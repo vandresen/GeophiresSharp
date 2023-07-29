@@ -1,0 +1,39 @@
+﻿<style>
+    .report-container {
+        max-height: 500px; /* Set the maximum height to your desired value */
+        overflow-y: auto;
+    }
+</style>
+
+<MudDialog Title="Report Dialog">
+    <DialogContent>
+        <div class="report-container">
+            <pre>@content</pre>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@Ok">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string content { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Loading = true;
+        Console.WriteLine(content);
+        ReportText = content;
+    }
+
+    private string ReportText;
+    private bool Loading = false;
+
+    private void Ok()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}
