@@ -96,5 +96,24 @@ namespace BlazorGeophiresSharp.Server.Core
             double avg = sum / numbers.Length;
             return avg;
         }
+
+        public static double[] linspace(double StartValue, double EndValue, int numberofpoints)
+        {
+            double[] parameterVals = new double[numberofpoints];
+            double increment = Math.Abs(StartValue - EndValue) / Convert.ToDouble(numberofpoints - 1);
+            int j = 0; //will keep a track of the numbers 
+            double nextValue = StartValue;
+            for (int i = 0; i < numberofpoints; i++)
+            {
+                parameterVals.SetValue(nextValue, j);
+                j++;
+                if (j > numberofpoints)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+                nextValue = nextValue + increment;
+            }
+            return parameterVals;
+        }
     }
 }

@@ -47,7 +47,7 @@ namespace BlazorGeophiresSharp.Server.Core
         private double[] ElectricityProduced;
         private NDarray nptimevector;
         private NDarray PumpingkWh;
-        private System.Numerics.Vector<double> timeVector;
+        private double[] timeVector;
 
         public ModelCalculation(ILogger<ModelCalculation> logger)
         {
@@ -147,7 +147,11 @@ namespace BlazorGeophiresSharp.Server.Core
 
             // specify time-stepping vectors THIS MUST BE PUT IN A SCRIPT WHEM THE TWO VARAIABLES BELOW ARE NEEDED
             //timevector = np.linspace(0, plantlifetime, timestepsperyear * plantlifetime + 1)
-            nptimevector = np.linspace(0, finParms.plantlifetime, (simulationParms.timestepsperyear * finParms.plantlifetime + 1));
+            int numPoints = simulationParms.timestepsperyear * finParms.plantlifetime + 1;
+            double start = 0.0;
+            double end = finParms.plantlifetime;
+
+            timeVector = Utilities.linspace(start, end, numPoints);
             //var Tresoutput = np.zeros(timevector.len);
             
             // calculate reservoir water properties
@@ -156,7 +160,7 @@ namespace BlazorGeophiresSharp.Server.Core
 
             // temperature gain in injection wells
             sstParms.Tinj = sstParms.Tinj + sstParms.tempgaininj;
-            _logger.LogInformation("Completing CalculateInitialReservoirTemperature");
+            
         }
 
         private double[] CalculateMaximumWellDepth()
@@ -213,8 +217,6 @@ namespace BlazorGeophiresSharp.Server.Core
             // resoption = 4  Thermal drawdown percentage model (GETEM)
             // resoption = 5  Generic user-provided temperature profile
             // resoption = 6  Tough2 is called
-
-            string strTresoutput = "";
             if (sstParms.resoption == 1)
             {
                 // convert flowrate to volumetric rate
@@ -226,21 +228,24 @@ namespace BlazorGeophiresSharp.Server.Core
 
                 // calculate non-dimensional time
                 double timeParms = Math.Pow((rhowater * cpwater), 2) / (4 * sstParms.krock * sstParms.rhorock * sstParms.cprock) * Math.Pow((q / sstParms.fracnumb / sstParms.fracwidth / sstParms.fracheight), 2);
-                var td = timeParms * nptimevector * 365.0 * 24.0 * 3600;
+                double scalar = timeParms * 365.0 * 24.0 * 3600;
+                //var td = nptimevector * scalar;
+                double[] td = timeVector.Select(x => x * scalar).ToArray();
 
                 // calculate non-dimensional temperature array
                 ILaplaceInversion pi = new LaplaceInversionTalbot();
-                double[] temptd = new double[td.len - 1]; ;
-                for (int i = 1; i < td.len; i++)
+                double[] temptd = new double[td.Length - 1]; ;
+                for (int i = 1; i < td.Length; i++)
                 {
                     temptd[i - 1] = (double)td[i];
                 }
                 double[] Twnd = pi.Calculate(fp, temptd);
-                var npTwnd = np.asarray(Twnd);
-                var tempTresoutput = Trock - (npTwnd * (Trock - sstParms.Tinj));
-                Tresoutput = new double[tempTresoutput.len + 1];
+                scalar = Trock - sstParms.Tinj;
+                double[] tempTwnd = Twnd.Select(x => x * scalar).ToArray();
+                double[] tempTresoutput = tempTwnd.Select(x => Trock - x).ToArray();
+                Tresoutput = new double[tempTresoutput.Length + 1];
                 Tresoutput[0] = Trock;
-                for (int i = 0; i < tempTresoutput.len; i++)
+                for (int i = 0; i < tempTresoutput.Length; i++)
                 {
                     Tresoutput[i + 1] = (double)tempTresoutput[i];
                 }
@@ -275,6 +280,7 @@ namespace BlazorGeophiresSharp.Server.Core
                 // specify Laplace-space function
                 LaplaceFunction fp = (s) => { return (1.0 / s) * (1 - Complex.Exp(-(1 + ntu / (gamma * (s + ntu))) * s)); };
 
+                nptimevector = np.array(timeVector);
                 var td = nptimevector * 365.0 * 24.0 * 3600 / tres;
                 ILaplaceInversion pi = new LaplaceInversionTalbot();
                 double[] temptd = new double[td.len - 1]; ;
@@ -303,6 +309,7 @@ namespace BlazorGeophiresSharp.Server.Core
             }
             else if (sstParms.resoption == 3)
             {
+                nptimevector = np.array(timeVector);
                 Tresoutput = new double[nptimevector.len];
                 Tresoutput[0] = Trock;
                 for (int i = 1; i < nptimevector.len; i++)
@@ -313,6 +320,7 @@ namespace BlazorGeophiresSharp.Server.Core
             }
             else if (sstParms.resoption == 4)
             {
+                nptimevector = np.array(timeVector);
                 var npTresoutput = (1 - sstParms.drawdp * nptimevector) * (Trock - sstParms.Tinj) + sstParms.Tinj; //this is no longer as in thesis (equation 4.16)
                 Tresoutput = npTresoutput.GetData<double>();
             }
@@ -358,6 +366,8 @@ namespace BlazorGeophiresSharp.Server.Core
             //double[] Tresoutput = Array.ConvertAll(strTresoutputArray, Double.Parse);
 
             //Tresoutput = Utilities.ConvertStringToArray(strTresoutput);
+
+            _logger.LogInformation("Completing CalculateReservoirTemperatureOutput");
         }
 
         private void CalculateWellboreTemperatureDrop()
@@ -368,6 +378,7 @@ namespace BlazorGeophiresSharp.Server.Core
             }
             else if (sstParms.rameyoptionprod == 1)
             {
+                nptimevector = np.array(timeVector);
                 var alpharock = sstParms.krock / (sstParms.rhorock * sstParms.cprock);
                 var temptimevector = nptimevector.GetData<double>();
                 var npframey = np.zeros(temptimevector.Length);
@@ -382,8 +393,11 @@ namespace BlazorGeophiresSharp.Server.Core
                 //#assume borehole thermal resistance negligible to rock thermal resistance        
                 var nprameyA = sstParms.prodwellflowrate * cpwater * np.array(framey) / 2 / Math.PI / sstParms.krock;
                 // This code is only valid so far for 1 gradient and deviation = 0 !!!!!!!!   For multiple gradients, use Ramey's model for every layer
-                var npProdTempDrop = -((Trock - np.array(Tresoutput)) - averagegradient * (sstParms.depth - nprameyA) +
-                    (Tresoutput - averagegradient * nprameyA - Trock) * np.exp(-sstParms.depth / nprameyA));
+                var scalar1 = (sstParms.depth - nprameyA);
+                //var scalar2 = averagegradient * nprameyA - Trock;
+                var scalar3 = np.exp(-sstParms.depth / nprameyA);
+                var npProdTempDrop = -((Trock - np.array(Tresoutput)) - averagegradient * scalar1 +
+                    (np.array(Tresoutput) - averagegradient * nprameyA - Trock) * scalar3);
                 ProdTempDrop = npProdTempDrop.GetData<double>();
             }
             var npProducedTemperature = np.array(Tresoutput) - np.array(ProdTempDrop);
