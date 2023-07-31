@@ -1,4 +1,5 @@
 using BlazorGeophiresSharp.Client;
+using BlazorGeophiresSharp.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,5 +13,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddMudServices();
+
+builder.Services.AddScoped<IDisplayMessage, DisplayMessage>();
 
 await builder.Build().RunAsync();

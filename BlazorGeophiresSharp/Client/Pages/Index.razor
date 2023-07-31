@@ -2,6 +2,7 @@
 
 @inject HttpClient Http
 @inject IDialogService DialogService
+@inject IDisplayMessage displayMessage
 @inject NavigationManager NavigationManager
 
 <div>
@@ -55,6 +56,11 @@
 
     private async Task OpenDialog()
     {
+        if (FileSelection == "No file selected")
+        {
+            await displayMessage.DisplayErrorMessage("Please select a data connector");
+            return;
+        }
         InputParameters input = new InputParameters();
         Response result = new Response();
         input.Content = content;
