@@ -10,6 +10,9 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Reflection.Metadata;
+using Newtonsoft.Json.Linq;
 
 namespace BlazorGeophiresSharp.Server.Core
 {
@@ -378,36 +381,41 @@ namespace BlazorGeophiresSharp.Server.Core
             }
             else if (sstParms.rameyoptionprod == 1)
             {
-                nptimevector = np.array(timeVector);
                 var alpharock = sstParms.krock / (sstParms.rhorock * sstParms.cprock);
-                var temptimevector = nptimevector.GetData<double>();
-                var npframey = np.zeros(temptimevector.Length);
-                var framey = npframey.GetData<double>();
-                var nptempframey = -np.log(1.1 * (sstParms.prodwelldiam / 2.0) / np.sqrt(4.0 * alpharock * np.array(temptimevector[1..]) * 365.0 * 24.0 * 3600.0 * stParms.utilfactor)) - 0.29;
-                var tempframey = nptempframey.GetData<double>();
+                double[] framey = new double[timeVector.Length];
+                double scalar1 = 1.1 * (sstParms.prodwelldiam / 2.0);
+                double scalar2 = 4.0 * alpharock * 365.0 * 24.0 * 3600.0 * stParms.utilfactor;
+                double[] tempArray = Utilities.SliceArray(timeVector, 1);
+                tempArray = tempArray.Select(x => x * scalar2).ToArray();
+                double[] tempframey = tempArray.Select(x => -Math.Log(scalar1 / Math.Sqrt(x)) - 0.29).ToArray();
                 framey = framey.ArrayCopy(1, tempframey);
+
                 // Assume outside diameter of casing is 10% larger than inside diameter of production pipe (=prodwelldiam)
-                var npFirstFramey = -np.log(1.1 * (sstParms.prodwelldiam / 2.0) / np.sqrt(4.0 * alpharock * np.array(temptimevector[1]) * 365.0 * 24.0 * 3600.0 * stParms.utilfactor)) - 0.29;
-                var firstFramey = npFirstFramey.GetData<double>();
-                framey[0] = firstFramey[0];
-                //#assume borehole thermal resistance negligible to rock thermal resistance        
-                var nprameyA = sstParms.prodwellflowrate * cpwater * np.array(framey) / 2 / Math.PI / sstParms.krock;
+                framey[0] = -Math.Log(scalar1 / Math.Sqrt(timeVector[1] * scalar2)) - 0.29;
+
+                //#assume borehole thermal resistance negligible to rock thermal resistance
+                scalar1 = sstParms.prodwellflowrate * cpwater;
+                double[] rameyA = framey.Select(x => (scalar1 * x ) / 2 / Math.PI / sstParms.krock).ToArray();
+
                 // This code is only valid so far for 1 gradient and deviation = 0 !!!!!!!!   For multiple gradients, use Ramey's model for every layer
-                var scalar1 = (sstParms.depth - nprameyA);
-                //var scalar2 = averagegradient * nprameyA - Trock;
-                var scalar3 = np.exp(-sstParms.depth / nprameyA);
-                var npProdTempDrop = -((Trock - np.array(Tresoutput)) - averagegradient * scalar1 +
-                    (np.array(Tresoutput) - averagegradient * nprameyA - Trock) * scalar3);
-                ProdTempDrop = npProdTempDrop.GetData<double>();
+                ProdTempDrop = Tresoutput.Select(x => (Trock - x)).ToArray();
+                tempArray = rameyA.Select(x => averagegradient * (sstParms.depth - x)).ToArray();
+                ProdTempDrop = ProdTempDrop.Zip(tempArray, (x, y) => x - y).ToArray();
+                tempArray = rameyA.Select(x => averagegradient * x).ToArray();
+                tempArray = Tresoutput.Zip(tempArray, (x, y) => x - y).ToArray();
+                tempArray = tempArray.Select(x => x - Trock).ToArray();
+                var tempArray2 = rameyA.Select(x => Math.Exp(-sstParms.depth / x)).ToArray();
+                tempArray = tempArray.Zip(tempArray2, (x, y) => x * y).ToArray();
+                ProdTempDrop = ProdTempDrop.Zip(tempArray, (x, y) => x + y).ToArray();
+                ProdTempDrop = ProdTempDrop.Select(X => X*(-1)).ToArray();
             }
-            var npProducedTemperature = np.array(Tresoutput) - np.array(ProdTempDrop);
-            ProducedTemperature = npProducedTemperature.GetData<double>();
+            ProducedTemperature = Tresoutput.Zip(ProdTempDrop, (x, y) => x - y).ToArray();
             calcResult.ProdTempDrop = ProdTempDrop;
 
             // Redrilling
             if (sstParms.resoption < 5) // only applies to the built-in analytical reservoir models
             {
-                npProducedTemperature = np.array(ProducedTemperature);
+                var npProducedTemperature = np.array(ProducedTemperature);
                 var npindexfirstmaxdrawdown = (int)np.argmax(npProducedTemperature < (1 - sstParms.maxdrawdown) * ProducedTemperature[0]);
                 if (npindexfirstmaxdrawdown > 0)
                 {

@@ -1,5 +1,6 @@
 ﻿using Numpy;
 using System;
+using System.Linq;
 
 namespace BlazorGeophiresSharp.Server.Core
 {
@@ -114,6 +115,19 @@ namespace BlazorGeophiresSharp.Server.Core
                 nextValue = nextValue + increment;
             }
             return parameterVals;
+        }
+
+        public static T[] SliceArray<T>(T[] array, int startIndex)
+        {
+            if (startIndex >= array.Length)
+                return new T[0]; // If the startIndex is greater than or equal to the array length, return an empty array
+
+            return array.Skip(startIndex).ToArray();
+        }
+
+        public static double[] SqrtArray(double[] array)
+        {
+            return array.Select(x => Math.Sqrt(x)).ToArray();
         }
     }
 }
