@@ -232,7 +232,7 @@ namespace BlazorGeophiresSharp.Server.Reports
                     string geofluidTemprature = String.Format("{0,18:F2}", (calcResult.ProducedTemperature[i * simParms.timestepsperyear]));
                     string pumpPower = String.Format("{0,15:F4}", (calcResult.PumpingPower[i * simParms.timestepsperyear]));
                     string netPower = String.Format("{0,14:F4}", (calcResult.NetElectricityProduced[i * simParms.timestepsperyear]));
-                    string firstLaw = String.Format("{0,17:F4}", ((double)(calcResult.FirstLawEfficiency[i * simParms.timestepsperyear] * 100)));
+                    string firstLaw = String.Format("{0,17:F4}", ((calcResult.FirstLawEfficiency[i * simParms.timestepsperyear] * 100)));
                     reportOutput(year + thermalDrawdown + geofluidTemprature + pumpPower + netPower + firstLaw);
                 }
 
@@ -268,7 +268,7 @@ namespace BlazorGeophiresSharp.Server.Reports
                     string pumpPower = String.Format("{0,15:F4}", (calcResult.PumpingPower[i * simParms.timestepsperyear]));
                     string netPower = String.Format("{0,14:F4}", (calcResult.NetElectricityProduced[i * simParms.timestepsperyear]));
                     string netHeat = String.Format("{0,13:F4}", (calcResult.HeatProduced[i * simParms.timestepsperyear]));
-                    string firstLaw = String.Format("{0,15:F4}", ((double)(calcResult.FirstLawEfficiency[i * simParms.timestepsperyear] * 100)));
+                    string firstLaw = String.Format("{0,15:F4}", ((calcResult.FirstLawEfficiency[i * simParms.timestepsperyear] * 100)));
                     reportOutput(year + thermalDrawdown + geofluidTemprature + pumpPower + netPower + netHeat + firstLaw);
                 }
             }
@@ -289,7 +289,7 @@ namespace BlazorGeophiresSharp.Server.Reports
                 reportOutput($"    Initial net power generation (MWe)                {calcResult.NetElectricityProduced[0]}");
                 reportOutput($"    Average net power generation (MWe)                {Utilities.Average(calcResult.NetElectricityProduced)}");
                 reportOutput($"    Initial pumping power/net installed power (%)     {calcResult.PumpingPower[0] / calcResult.NetElectricityProduced[0] * 100}");
-                reportOutput($"    Average Annual Net Electricity Generation (GWh/yr) {np.average(calcResult.NetkWhProduced) / 1E6}");
+                reportOutput($"    Average Annual Net Electricity Generation (GWh/yr) {Utilities.Average(calcResult.NetkWhProduced) / 1E6}");
             }
             if (simParms.enduseoption > 1) //there is direct-use component
             {

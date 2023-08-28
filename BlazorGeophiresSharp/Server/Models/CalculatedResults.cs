@@ -4,7 +4,7 @@ namespace BlazorGeophiresSharp.Server.Models
 {
     public class CalculatedResults
     {
-        public NDarray FirstLawEfficiency { get; set; }
+        public double[] FirstLawEfficiency { get; set; }
         public double[] NetElectricityProduced { get; set; }
         public double[] ProdTempDrop { get; set; }
         public double[] Availability { get; set; }

@@ -25,6 +25,16 @@ namespace BlazorGeophiresSharp.Server.Core
             return rhowater;
         }
 
+        public static double[] ArrayDensityWater(double[] Twater)
+        {
+            var T = Twater.Select(x => x + 273.15).ToArray();
+            var tempArray = T.Select(x => 2.9104E-06 * x).ToArray();
+            tempArray = tempArray.Select(x => 0.00150896 - x).ToArray();
+            tempArray = tempArray.Zip(T, (x, y) => x * y).ToArray();
+            var rhowater = tempArray.Select(x => (0.7983223 + x) * 1000.0).ToArray();
+            return rhowater;
+        }
+
         public static NDarray npdensitywater(NDarray Twater)
         {
             var T = Twater + 273.15;
@@ -63,6 +73,20 @@ namespace BlazorGeophiresSharp.Server.Core
             //xp = np.linspace(5,150,30)
             //fp = np.array([1519.3, 1307.0, 1138.3, 1002.0, 890.2, 797.3, 719.1, 652.7, 596.1, 547.1, 504.4, 467.0, 433.9, 404.6, 378.5, 355.1, 334.1, 315.0, 297.8, 282.1, 267.8, 254.4, 242.3, 231.3, 221.3, 212.0, 203.4, 195.5, 188.2, 181.4])
             //muwater = np.interp(Twater,xp,fp)
+            return muwater;
+        }
+
+        public static double[] ArrayViscosityWater(double[] Twater)
+        {
+            double[] power = Twater.Select(temp => Math.Pow(10, 247.8 / (temp + 273.15 - 140))).ToArray();
+            var muwater = power.Select(x => 2.414E-5 * x).ToArray();
+            return muwater;
+        }
+
+        public static double ViscosityWater(double Twater)
+        {
+            double power = Math.Pow(10, 247.8 / (Twater + 273.15 - 140));
+            double muwater = 2.414E-5 * power;
             return muwater;
         }
 
@@ -128,6 +152,18 @@ namespace BlazorGeophiresSharp.Server.Core
         public static double[] SqrtArray(double[] array)
         {
             return array.Select(x => Math.Sqrt(x)).ToArray();
+        }
+
+        public static double TrapezoidalIntegration(double[] y, float dx)
+        {
+            double integral = 0.0;
+
+            for (int i = 0; i < y.Length - 1; i++)
+            {
+                integral += (y[i] + y[i + 1]) * dx / 2.0;
+            }
+
+            return integral;
         }
     }
 }

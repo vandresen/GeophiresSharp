@@ -36,7 +36,8 @@ namespace BlazorGeophiresSharp.Server.Controllers
                 _logger.LogInformation("Model created");
                 string result = await _mc.CreateReport();
                 response.Result = result;
-                _logger.LogInformation(response.Result.ToString());
+                _logger.LogInformation("Report created");
+                //_logger.LogInformation(response.Result.ToString());
             }
             catch (Exception ex)
             {
