@@ -1,4 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@inject ISimulationRepository sim
+@inject IDisplayMessage displayMessage
+@inject HttpClient Http
+@inject IDialogService DialogService
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -11,7 +15,85 @@
     </MudAppBar>
     <MudMainContent>
         <MudContainer Class="mt-5">
-            @Body
+            <div>
+                <FileSelection FileSelected="UploadFile" />
+            </div>
+            <br />
+            <div>
+                <MudTextField @bind-Value="FileSelection" Label="Selected File" ReadOnly="true" Variant="Variant.Outlined" />
+            </div>
+            <br />
+            <div>
+                <MudButton OnClick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+                    Model Calculations
+                </MudButton>
+            </div>
+            <MudGrid Class="mt-8" >
+                <MudItem xs="4">
+                    @if (simParms != null)
+                    {
+                        <Simulation Parms="simParms" />
+                    }
+                </MudItem>
+                <MudItem xs="8">
+                    <p>Under construction</p>
+                </MudItem>
+            </MudGrid>
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
+@code {
+    public string FileSelection { get; set; } = "No file selected";
+    private SimulationParameters simParms { get; set; }
+    string content = "No content";
+    bool closeResult = false;
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        FileSelection = file.Name;
+        Console.WriteLine(FileSelection);
+        using (var reader = new StreamReader(file.OpenReadStream()))
+        {
+            Console.WriteLine("Before reading content");
+            content = await reader.ReadToEndAsync();
+            Console.WriteLine("After");
+        }
+        string[] lines = content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+        Console.WriteLine($"Number of lines in file is {lines.Length}");
+        simParms = await sim.GetSimulationParameters(lines);
+        Console.WriteLine(simParms.timestepsperyear);
+        StateHasChanged();
+    }
+
+    private async Task OpenDialog()
+    {
+        if (FileSelection == "No file selected")
+        {
+            await displayMessage.DisplayErrorMessage("Please select a data connector");
+            return;
+        }
+        InputParameters input = new InputParameters();
+        Response result = new Response();
+        input.Content = content;
+        var response = await Http.PostAsJsonAsync("Modeling", input);
+        if (response.IsSuccessStatusCode)
+        {
+            result = await response.Content.ReadFromJsonAsync<Response>();
+            Console.WriteLine(result.Result);
+        }
+
+        string outputContent = result.Result.ToString();
+        var options = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var parameters = new DialogParameters { ["content"] = outputContent };
+        var output = await DialogService.Show<ModelResults>("Model Results", parameters, options).Result;
+
+        if (!output.Canceled)
+        {
+            closeResult = (bool)(output.Data ?? false);
+        }
+        content = "No content";
+        FileSelection = "No file selected";
+        // NavigationManager.NavigateTo($"/");
+    }
+}

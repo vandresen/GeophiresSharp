@@ -1,0 +1,55 @@
+﻿<h3>Simulation Parameters</h3>
+
+<MudTextField @bind-Value="Parms.timestepsperyear" Label="Time steps per year" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="endUseOption" Label="End-Use Option" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="PowerPlantTypes[Parms.pptype-1]" Label="Power plant type" ReadOnly="true" Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public SimulationParameters Parms { get; set; }
+    public int timestepsperyear { get; set; }
+    private string endUseOption;
+    private bool needsRefresh = false;
+    private string[] PowerPlantTypes = 
+    { 
+        "Subcritical ORC",
+        "Supercritical ORC",
+        "Single-flash",
+        "Double-flash"
+    };
+    private string[] EndUseOption =
+    {
+        "Electricitys",
+        "Direct-use heat",
+        "Cogen topping cycle",
+        "Cogen bottoming cycle",
+        "Cogen split of mass flow rate"
+    };
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     if (Parms.enduseoption < 10)
+    //     {
+    //         endUseOption = EndUseOption[Parms.enduseoption-1];
+    //     }
+    //     else
+    //     {
+    //         // Calculate the mapped value based on the tens range
+    //         int index = (Parms.enduseoption - 1) / 10 + 1;
+    //         endUseOption = EndUseOption[index - 1];
+    //     }
+    // }
+
+    protected override void OnParametersSet()
+    {
+        if (Parms.enduseoption < 10)
+        {
+            endUseOption = EndUseOption[Parms.enduseoption - 1];
+        }
+        else
+        {
+            // Calculate the mapped value based on the tens range
+            int index = (Parms.enduseoption - 1) / 10 + 1;
+            endUseOption = EndUseOption[index - 1];
+        }
+    }
+}

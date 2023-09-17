@@ -21,6 +21,7 @@ namespace BlazorGeophiresSharp.Server.Controllers
             _logger = logger;
             _mc = mc;
         }
+
         [HttpPost]
         public async Task<Response> Post(InputParameters input)
         {
@@ -29,7 +30,6 @@ namespace BlazorGeophiresSharp.Server.Controllers
             try
             {
                 string[] lines = input.Content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-                //ModelCalculation mc = new ModelCalculation(_logger);
                 await _mc.ReadFromRepository(lines);
                 _logger.LogInformation("Data read from repository");
                 _mc.CalculateModel();
