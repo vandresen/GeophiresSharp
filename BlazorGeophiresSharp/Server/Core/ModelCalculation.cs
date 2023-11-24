@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Components.Forms;
 using static MudBlazor.CategoryTypes;
+using System.Runtime.ConstrainedExecution;
 
 namespace BlazorGeophiresSharp.Server.Core
 {
@@ -41,14 +42,14 @@ namespace BlazorGeophiresSharp.Server.Core
         private double Cplant = 0;
         private double[] NetElectricityProduced = { 0.0 };
         private double[] Tresoutput;
-        private double[] ProdTempDrop;
+        private double[] ProdTempDrop = { 0.0 };
         private double[] pumpdepth;
         private double[] PumpingPower;
         private double[] PumpingPowerProd;
         private double[] PumpingPowerInj;
         private double[] ProducedTemperature;
         private double[] TenteringPP;
-        private double[] HeatExtracted;
+        private double[] HeatExtracted = new double[] { 0 };
         private double[] HeatProduced;
         private double[] ElectricityProduced;
         private NDarray nptimevector;
@@ -318,12 +319,11 @@ namespace BlazorGeophiresSharp.Server.Core
             }
             else if (sstParms.resoption == 3)
             {
-                nptimevector = np.array(timeVector);
-                Tresoutput = new double[nptimevector.len];
+                Tresoutput = new double[timeVector.Length];
                 Tresoutput[0] = Trock;
-                for (int i = 1; i < nptimevector.len; i++)
+                for (int i = 1; i < timeVector.Length; i++)
                 {
-                    double x = 1.0 / sstParms.drawdp / cpwater * Math.Sqrt(sstParms.krock * sstParms.rhorock * sstParms.cprock / (double)nptimevector[i] / (365.0 * 24.0 * 3600.0));
+                    double x = 1.0 / sstParms.drawdp / cpwater * Math.Sqrt(sstParms.krock * sstParms.rhorock * sstParms.cprock / timeVector[i] / (365.0 * 24.0 * 3600.0));
                     Tresoutput[i] = Utilities.Erf(x) * (Trock - sstParms.Tinj) + sstParms.Tinj;
                 }
             }
@@ -415,7 +415,8 @@ namespace BlazorGeophiresSharp.Server.Core
                 ProdTempDrop = ProdTempDrop.Zip(tempArray, (x, y) => x + y).ToArray();
                 ProdTempDrop = ProdTempDrop.Select(X => X*(-1)).ToArray();
             }
-            ProducedTemperature = Tresoutput.Zip(ProdTempDrop, (x, y) => x - y).ToArray();
+            //ProducedTemperature = Tresoutput.Zip(ProdTempDrop, (x, y) => x - y).ToArray();
+            ProducedTemperature = Tresoutput.SubtractArrays(ProdTempDrop);
             calcResult.ProdTempDrop = ProdTempDrop;
 
             // Redrilling
@@ -447,7 +448,8 @@ namespace BlazorGeophiresSharp.Server.Core
             double[] f1 = { 0.0 };
             double[] npf1 = { 0.0 };
             double[] npf3 = { 0.0 };
-            double[] Tprodaverage = Tresoutput.Zip(ProdTempDrop, (x, y) => x - y/4.0).ToArray();
+            var tmpProdTempDrop = ProdTempDrop.Select(X => X/4.0).ToArray();
+            double[] Tprodaverage = Tresoutput.SubtractArrays(tmpProdTempDrop);
             var rhowaterprod = Utilities.ArrayDensityWater(Tprodaverage);
             var muwaterprod = Utilities.ArrayViscosityWater(Tprodaverage);
             double[] vprod = rhowaterprod.
@@ -720,7 +722,7 @@ namespace BlazorGeophiresSharp.Server.Core
             double[] Availability = new double[] { 0 };
             double minReinjTemp;
             double[] FirstLawEfficiency = new double[] { 0 };
-            HeatExtracted = new double[] { 0 };
+            //double[]HeatExtracted = new double[] { 0 };
             //NDarray npTenteringPP = np.zeros(1);
             //NDarray npAvailability = np.zeros(1);
             //NDarray npHeatExtracted = np.zeros(1);
@@ -944,10 +946,15 @@ namespace BlazorGeophiresSharp.Server.Core
                         D0 = 1.69439E-1;
                         Tfraction = (stParms.Tenv - 15.0) / 10.0;
                     }
-                    var etaull = C2 * np.array(TenteringPP.MathPow(2)) + C1 * np.array(TenteringPP) + C0;
-                    var etauul = D2 * np.array(TenteringPP.MathPow(2)) + D1 * np.array(TenteringPP) + D0;
-                    var npetau = (1 - Tfraction) * etaull + Tfraction * etauul;
-                    etau = npetau.GetData<double>();
+                    double[] etaull = TenteringPP
+                        .Select(value => C2 * Math.Pow(value, 2) + C1 * value + C0)
+                        .ToArray();
+                    double[] etauul = TenteringPP
+                        .Select(value => D2 * Math.Pow(value, 2) + D1 * value + D0)
+                        .ToArray();
+                    etau = etaull
+                        .Zip(etauul, (val1, val2) => (1 - Tfraction) * val1 + Tfraction * val2)
+                        .ToArray();
                     if (stParms.Tenv < 15.0)
                     {
                         C2 = -7.70928E-4;
@@ -968,10 +975,15 @@ namespace BlazorGeophiresSharp.Server.Core
                         D0 = 18.0798;
                         Tfraction = (stParms.Tenv - 15.0) / 10.0;
                     }
-                    var reinjtll = C2 * np.array(TenteringPP.MathPow(2)) + C1 * np.array(TenteringPP) + C0;
-                    var reinjtul = D2 * np.array(TenteringPP.MathPow(2)) + D1 * np.array(TenteringPP) + D0;
-                    var npReinjTemp = (1.0 - Tfraction) * reinjtll + Tfraction * reinjtul;
-                    ReinjTemp = npReinjTemp.GetData<double>();
+                    var reinjtll = TenteringPP
+                        .Select(value => C2 * Math.Pow(value, 2) + C1 * value + C0)
+                        .ToArray();
+                    var reinjtul = TenteringPP
+                        .Select(value => D2 * Math.Pow(value, 2) + D1 * value + D0)
+                        .ToArray();
+                    ReinjTemp = reinjtll
+                        .Zip(reinjtul, (val1, val2) => (1.0 - Tfraction) * val1 + Tfraction * val2)
+                        .ToArray();
                 }
 
                 minReinjTemp = MathNet.Numerics.Statistics.Statistics.Minimum(ReinjTemp);
@@ -1025,19 +1037,20 @@ namespace BlazorGeophiresSharp.Server.Core
                 // enduseoption = 3: cogen topping cycle
                 else if (Convert.ToInt32(Math.Floor(tmpenduseoption)) == 3)
                 {
-                    //npAvailability = np.array(Availability);
-                    //var npElectricityProduced = npAvailability * etau * sstParms.nprod * sstParms.prodwellflowrate;
-                    //ElectricityProduced = npElectricityProduced.GetData<double>();
+                    ElectricityProduced = Availability.Zip(etau, (avail, e) => avail * e)
+                        .Select(result => result * sstParms.nprod * sstParms.prodwellflowrate)
+                        .ToArray();
                     //Heat extracted from geofluid [MWth]
-                    //var npProducedTemperature = np.array(ProducedTemperature);
-                    //npHeatExtracted = sstParms.nprod * sstParms.prodwellflowrate * cpwater * (npProducedTemperature - sstParms.Tinj) / 1E6;
-                    //HeatExtracted = npHeatExtracted.GetData<double>();
+                    HeatExtracted = ProducedTemperature
+                        .Select(temp => sstParms.nprod * sstParms.prodwellflowrate * cpwater * (temp - sstParms.Tinj) / 1E6)
+                        .ToArray();
                     ////Useful heat for direct-use application [MWth] 
-                    //var npReinjTemp = np.array(ReinjTemp);
-                    //npHeatProduced = stParms.enduseefficiencyfactor * sstParms.nprod * sstParms.prodwellflowrate * cpwater * (npReinjTemp - sstParms.Tinj) / 1E6;
-                    //HeatProduced = npHeatProduced.GetData<double>();
-                    //var npHeatExtractedTowardsElectricity = sstParms.nprod * sstParms.prodwellflowrate * cpwater * (npProducedTemperature - npReinjTemp) / 1E6;
-                    //HeatExtractedTowardsElectricity = npHeatExtractedTowardsElectricity.GetData<double>();
+                    HeatProduced = ReinjTemp
+                        .Select(temp => stParms.enduseefficiencyfactor * sstParms.nprod * sstParms.prodwellflowrate * cpwater * (temp - sstParms.Tinj) / 1E6)
+                        .ToArray();
+                    HeatExtractedTowardsElectricity = ProducedTemperature
+                        .Zip(ReinjTemp, (producedTemp, reinjTemp) => sstParms.nprod * sstParms.prodwellflowrate * cpwater * (producedTemp - reinjTemp) / 1E6)
+                        .ToArray();
                 }
                 else if (Convert.ToInt32(Math.Floor(tmpenduseoption)) == 4) //enduseoption = 4: cogen bottoming cycle
                 {
@@ -1653,17 +1666,21 @@ namespace BlazorGeophiresSharp.Server.Core
             {
                 var iave = finParms.FIB * finParms.BIR * (1 - finParms.CTR) + (1 - finParms.FIB) * finParms.EIR; //average return on investment (tax and inflation adjusted)
                 var CRF = iave / (1 - Math.Pow(1 + iave, -finParms.plantlifetime)); //capital recovery factor
-                var inflationvector = np.power(np.array(1 + finParms.RINFL), np.linspace(1, finParms.plantlifetime, finParms.plantlifetime));
-                var discountvector = 1.0 / np.power(np.array(1 + iave), np.linspace(1, finParms.plantlifetime, finParms.plantlifetime));
-                var NPVcap = np.sum((1 + finParms.inflrateconstruction) * Ccap * CRF * discountvector);
-                var NPVfc = np.sum((1 + finParms.inflrateconstruction) * Ccap * finParms.PTR * inflationvector * discountvector);
-                var NPVit = np.sum(finParms.CTR / (1 - finParms.CTR) * ((1 + finParms.inflrateconstruction) * Ccap * CRF - Ccap / finParms.plantlifetime) * discountvector);
+                var tmpArray = Utilities.linspace(1, finParms.plantlifetime, finParms.plantlifetime);
+                var inflationvector = tmpArray.Select(t => Math.Pow(1 + finParms.RINFL, t)).ToArray();
+                var discountvector = tmpArray.Select(t => 1.0 / Math.Pow(1 + iave, t)).ToArray();
+                var NPVcap = discountvector.Select(discount => (1 + finParms.inflrateconstruction) * Ccap * CRF * discount).Sum();
+                var NPVfc = inflationvector
+                        .Zip(discountvector, (inflation, discount) => (1 + finParms.inflrateconstruction) * Ccap * finParms.PTR * inflation * discount)
+                        .Sum();
+                var NPVit = discountvector
+                        .Sum(discount => finParms.CTR / (1 - finParms.CTR) * ((1 + finParms.inflrateconstruction) * Ccap * CRF - Ccap / finParms.plantlifetime) * discount);
                 var NPVitc = (1 + finParms.inflrateconstruction) * Ccap * finParms.RITC / (1 - finParms.CTR);
                 if (simulationParms.enduseoption == 1)
                 {
-                    var NPVoandm = np.sum(Coam * inflationvector * discountvector);
+                    var NPVoandm = np.sum(Coam * np.array(inflationvector) * discountvector);
                     var NPVgrt = finParms.GTR / (1 - finParms.GTR) * (NPVcap + NPVoandm + NPVfc + NPVit - NPVitc);
-                    var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc) / np.sum(calcResult.NetkWhProduced * inflationvector * discountvector) * 1E8;
+                    var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc) / np.sum(calcResult.NetkWhProduced * np.array(inflationvector) * discountvector) * 1E8;
                     Price = (double)npPrice;
                 }
                 else if (simulationParms.enduseoption == 2)
@@ -1672,7 +1689,7 @@ namespace BlazorGeophiresSharp.Server.Core
                     averageannualpumpingcosts = np.average(PumpingkWh) * ccParms.elecprice / 1E6; //M$/year
                     var NPVoandm = np.sum((Coam + PumpingCosts) * inflationvector * discountvector);
                     var NPVgrt = finParms.GTR / (1 - finParms.GTR) * (NPVcap + NPVoandm + NPVfc + NPVit - NPVitc);
-                    var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc) / np.sum(calcResult.HeatkWhProduced * inflationvector * discountvector) * 1E8;
+                    var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc) / np.sum(calcResult.HeatkWhProduced * np.array(inflationvector) * discountvector) * 1E8;
                     npPrice = npPrice * 2.931; //$/MMBTU
                     Price = (double)npPrice;
                 }
@@ -1680,18 +1697,28 @@ namespace BlazorGeophiresSharp.Server.Core
                 {
                     if (simulationParms.enduseoption % 10 == 1) //heat sales is additional income revenue stream
                     {
-                        var annualheatincome = np.array(calcResult.HeatkWhProduced) * ccParms.heatprice / 1E6; //M$/year ASSUMING ELECPRICE IS IN $/KWH FOR HEAT SALES
-                        var NPVoandm = np.sum(Coam * inflationvector * discountvector);
+                        //M$/year ASSUMING ELECPRICE IS IN $/KWH FOR HEAT SALES
+                        var annualheatincome = calcResult.HeatkWhProduced.Select(heat => heat * ccParms.heatprice / 1E6).ToArray();
+                        var NPVoandm = inflationvector.Zip(discountvector, (inflation, discount) => Coam * inflation * discount).Sum();
                         var NPVgrt = finParms.GTR / (1 - finParms.GTR) * (NPVcap + NPVoandm + NPVfc + NPVit - NPVitc);
-                        var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc - np.sum(annualheatincome * inflationvector * discountvector)) / np.sum(calcResult.NetkWhProduced * inflationvector * discountvector) * 1E8;
-                        Price = (double)npPrice;
+                        var tmpScalar = NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc;
+                        var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc - np.sum(annualheatincome * np.array(inflationvector) * discountvector)) / np.sum(calcResult.NetkWhProduced * np.array(inflationvector) * discountvector) * 1E8;
+                        var sumTerm = annualheatincome
+                            .Zip(inflationvector, (income, inflation) => income * inflation)
+                            .Zip(discountvector, (term, discount) => term * discount)
+                            .Sum();
+                        var sumTerm2 = calcResult.NetkWhProduced
+                            .Zip(inflationvector, (produced, inflation) => produced * inflation)
+                            .Zip(discountvector, (term, discount) => term * discount)
+                            .Sum();
+                        Price = (tmpScalar - sumTerm) / sumTerm2 * 1E8;
                     }
                     else if (simulationParms.enduseoption % 10 == 2) //electricity sales is additional income revenue stream
                     {
                         var annualelectricityincome = np.array(calcResult.NetkWhProduced) * ccParms.elecprice / 1E6; //M$/year
-                        var NPVoandm = np.sum(Coam * inflationvector * discountvector);
+                        var NPVoandm = np.sum(Coam * np.array(inflationvector) * discountvector);
                         var NPVgrt = finParms.GTR / (1 - finParms.GTR) * (NPVcap + NPVoandm + NPVfc + NPVit - NPVitc);
-                        var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc - np.sum(annualelectricityincome * inflationvector * discountvector)) / np.sum(calcResult.HeatkWhProduced * inflationvector * discountvector) * 1E8;
+                        var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc - np.sum(annualelectricityincome * np.array(inflationvector) * discountvector)) / np.sum(calcResult.HeatkWhProduced * np.array(inflationvector) * discountvector) * 1E8;
                         Price = (double)npPrice * 2.931;  //$/MMBTU
                     }
                 }

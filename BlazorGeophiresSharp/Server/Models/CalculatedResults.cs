@@ -20,6 +20,7 @@ namespace BlazorGeophiresSharp.Server.Models
         public double[] DP4 { get; set; }
         public double[] HeatProduced { get; set; }
         public double[] HeatkWhProduced { get; set; }
+        //public double[] HeatExtracted { get; set; }
         public double Price { get; set; }
         public double Trock { get; set; }
         public double Pprodwellhead { get; set; }
