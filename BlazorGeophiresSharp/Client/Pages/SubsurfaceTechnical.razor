@@ -1,0 +1,39 @@
+﻿
+<MudTextField @bind-Value="reservoirModel" Label="Reservoir Model" ReadOnly="true" Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public SubsurfaceTechnicalParameters Parms { get; set; }
+
+    private string reservoirModel;
+    private string[] ReservoirOption =
+    {
+        "Multiple parallel fractures model (LANL)",
+        "Volumetric block model (1D linear heat sweep model (Stanford))",
+        "Drawdown parameter model (Tester)",
+        "Thermal drawdown percentage model (GETEM)",
+        "Generic user-provided temperature profile",
+        "TOUGH2 is called"
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (Parms.resoption < 7)
+        {
+            reservoirModel = ReservoirOption[Parms.resoption];
+        }
+        else
+        {
+            reservoirModel = ReservoirOption[4];
+        }
+        // if (Parms.enduseoption < 10)
+        // {
+        //     endUseOption = EndUseOption[Parms.enduseoption - 1];
+        // }
+        // else
+        // {
+        //     // Calculate the mapped value based on the tens range
+        //     int index = (Parms.enduseoption - 1) / 10 + 1;
+        //     endUseOption = EndUseOption[index - 1];
+        // }
+    }
+}

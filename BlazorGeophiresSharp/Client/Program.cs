@@ -24,7 +24,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddMudServices();
 
 builder.Services.AddScoped<IDisplayMessage, DisplayMessage>();
-builder.Services.AddScoped<SimulationParameters>();
+//builder.Services.AddScoped<SimulationParameters>();
 builder.Services.AddScoped<ISimulationRepository, SimulationRepository>();
+builder.Services.AddScoped<ISubsurfaceTechnicalRepository, SubsurfaceTechnicalRepository>();
 
 await builder.Build().RunAsync();

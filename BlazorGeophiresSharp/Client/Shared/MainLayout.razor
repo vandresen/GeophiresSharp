@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject ISimulationRepository sim
+@inject ISubsurfaceTechnicalRepository subsurfaceRep
 @inject IDisplayMessage displayMessage
 @inject HttpClient Http
 @inject IDialogService DialogService
@@ -36,7 +37,23 @@
                     }
                 </MudItem>
                 <MudItem xs="8">
-                    <p>Under construction</p>
+                        @if (simParms != null)
+                        {
+                            <MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary">
+                                <MudTabPanel Text="Subsurface Technical Parameters">
+                                <SubsurfaceTechnical Parms="subsurfaceParms" />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Surface Technical Parameters">
+                                    <SurfaceTechnical />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Financial Parameters">
+                                    <Financial />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Capital and O&M Cost Parameters">
+                                    <CapitalCost />
+                                </MudTabPanel>
+                            </MudTabs>
+                        }                
                 </MudItem>
             </MudGrid>
         </MudContainer>
@@ -46,6 +63,7 @@
 @code {
     public string FileSelection { get; set; } = "No file selected";
     private SimulationParameters simParms { get; set; }
+    private SubsurfaceTechnicalParameters subsurfaceParms { get; set; }
     string content = "No content";
     bool closeResult = false;
 
@@ -63,6 +81,8 @@
         Console.WriteLine($"Number of lines in file is {lines.Length}");
         simParms = await sim.GetSimulationParameters(lines);
         Console.WriteLine(simParms.timestepsperyear);
+        subsurfaceParms = await subsurfaceRep.GetSubsurfaceTechnicalParameters(lines, simParms);
+        Console.WriteLine(subsurfaceParms.resoption);
         StateHasChanged();
     }
 
