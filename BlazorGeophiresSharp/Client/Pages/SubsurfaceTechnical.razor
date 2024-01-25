@@ -1,5 +1,14 @@
 ﻿
 <MudTextField @bind-Value="reservoirModel" Label="Reservoir Model" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="drawDownParameter" Label="Drawdown Parameter" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="reservoirDepth" Label="Reservoir Depth" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="numberOfProductionWells" Label="Number of Production Wells" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="numberOfInjectionWells" Label="Number of Injection Wells" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="productionWellDiameter" Label="Production Well Diameter" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="injectionWellDiameter" Label="Injection Well Diameter" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="rameyProductionWellboreModel" Label="Ramey Production Wellbore Model" ReadOnly="true" Variant="Variant.Outlined" />
+
+<MudTextField @bind-Value="numberSegments" Label="Number of Segments" ReadOnly="true" Variant="Variant.Outlined" />
 
 @code {
     [Parameter] public SubsurfaceTechnicalParameters Parms { get; set; }
@@ -7,24 +16,53 @@
     private string reservoirModel;
     private string[] ReservoirOption =
     {
-        "Multiple parallel fractures model (LANL)",
-        "Volumetric block model (1D linear heat sweep model (Stanford))",
-        "Drawdown parameter model (Tester)",
-        "Thermal drawdown percentage model (GETEM)",
+        "Multiple parallel fractures model",
+        "Volumetric block model",
+        "Drawdown parameter model",
+        "Thermal drawdown percentage model",
         "Generic user-provided temperature profile",
         "TOUGH2 is called"
     };
+    private double drawDownParameter;
+    private double reservoirDepth;
+    private int numberSegments;
+    private int numberOfProductionWells;
+    private int numberOfInjectionWells;
+    private double productionWellDiameter;
+    private double injectionWellDiameter;
+    private string[] rameyProductionWellboreModelOptions =
+    {
+        "Disable",
+        "Enable"
+    };
+    private string rameyProductionWellboreModel;
 
     protected override void OnParametersSet()
     {
         if (Parms.resoption < 7)
         {
-            reservoirModel = ReservoirOption[Parms.resoption];
+            reservoirModel = ReservoirOption[Parms.resoption-1];
         }
         else
         {
             reservoirModel = ReservoirOption[4];
         }
+        drawDownParameter = Parms.drawdp;
+        reservoirDepth = Parms.depth;
+        numberOfProductionWells = Parms.nprod;
+        numberOfInjectionWells = Parms.ninj;
+        productionWellDiameter = Parms.prodwelldiam;
+        injectionWellDiameter = Parms.injwelldiam;
+        if (Parms.rameyoptionprod < 2)
+        {
+            rameyProductionWellboreModel = rameyProductionWellboreModelOptions[Parms.rameyoptionprod];
+        }
+        else
+        {
+            rameyProductionWellboreModel = rameyProductionWellboreModelOptions[0];
+        }
+
+        numberSegments = Parms.numseg;
         // if (Parms.enduseoption < 10)
         // {
         //     endUseOption = EndUseOption[Parms.enduseoption - 1];

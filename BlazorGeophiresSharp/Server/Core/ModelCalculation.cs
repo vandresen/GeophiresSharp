@@ -329,9 +329,8 @@ namespace BlazorGeophiresSharp.Server.Core
             }
             else if (sstParms.resoption == 4)
             {
-                nptimevector = np.array(timeVector);
-                var npTresoutput = (1 - sstParms.drawdp * nptimevector) * (Trock - sstParms.Tinj) + sstParms.Tinj; //this is no longer as in thesis (equation 4.16)
-                Tresoutput = npTresoutput.GetData<double>();
+                //this is no longer as in thesis (equation 4.16)
+                Tresoutput = timeVector.Select(x => (1 - sstParms.drawdp * x) * (Trock - sstParms.Tinj) + sstParms.Tinj).ToArray();
             }
             else if (sstParms.resoption == 5)
             {
@@ -800,31 +799,28 @@ namespace BlazorGeophiresSharp.Server.Core
                         D0 = -1.012E-1;
                         Tfraction = (stParms.Tenv - 15.0) / 10.0;
                     }
-                    //npTenteringPP = np.array(TenteringPP);
-                    //var etaull = C1 * npTenteringPP + C0;
-                    //var etauul = D1 * npTenteringPP + D0;
-                    //var npetau = (1 - Tfraction) * etaull + Tfraction * etauul;
-                    //etau = npetau.GetData<double>();
-                    //if (stParms.Tenv < 15.0)
-                    //{
-                    //    C1 = 0.0894;
-                    //    C0 = 55.6;
-                    //    D1 = 0.0894;
-                    //    D0 = 62.6;
-                    //    Tfraction = (stParms.Tenv - 5.0) / 10.0;
-                    //}
-                    //else
-                    //{
-                    //    C1 = 0.0894;
-                    //    C0 = 62.6;
-                    //    D1 = 0.0894;
-                    //    D0 = 69.6;
-                    //    Tfraction = (stParms.Tenv - 15.0) / 10.0;
-                    //}
-                    //var npreinjtll = C1 * npTenteringPP + C0;
-                    //var npreinjtul = D1 * npTenteringPP + D0;
-                    //var npReinjTemp = (1.0 - Tfraction) * npreinjtll + Tfraction * npreinjtul;
-                    //ReinjTemp = npReinjTemp.GetData<double>();
+                    var etaull = TenteringPP.Select(x => C1 * x + C0).ToArray();
+                    var etauul = TenteringPP.Select(x => D1 * x + D0).ToArray();
+                    etau = etaull.Zip(etauul, (x, y) => (1 - Tfraction) * x + Tfraction * y).ToArray();
+                    if (stParms.Tenv < 15.0)
+                    {
+                        C1 = 0.0894;
+                        C0 = 55.6;
+                        D1 = 0.0894;
+                        D0 = 62.6;
+                        Tfraction = (stParms.Tenv - 5.0) / 10.0;
+                    }
+                    else
+                    {
+                        C1 = 0.0894;
+                        C0 = 62.6;
+                        D1 = 0.0894;
+                        D0 = 69.6;
+                        Tfraction = (stParms.Tenv - 15.0) / 10.0;
+                    }
+                    var reinjtll = TenteringPP.Select(x => C1 * x + C0).ToArray();
+                    var reinjtul = TenteringPP.Select(x => D1 * x + D0).ToArray();
+                    ReinjTemp = reinjtll.Zip(reinjtul, (x, y) => (1 - Tfraction) * x + Tfraction * y).ToArray();
                 }
                 // Supercritical ORC
                 else if (simulationParms.pptype == 2)
@@ -1204,7 +1200,7 @@ namespace BlazorGeophiresSharp.Server.Core
             {
                 if (simulationParms.pptype == 1) //sub-critical ORC
                 {
-                    var MaxProducedTemperature = (double)Numpy.np.max(TenteringPP);
+                    var MaxProducedTemperature = TenteringPP.Max();
                     double CCAPP1;
                     if (MaxProducedTemperature < 150.0)
                     {
@@ -1218,8 +1214,7 @@ namespace BlazorGeophiresSharp.Server.Core
                     {
                         CCAPP1 = 2231 - 2 * (MaxProducedTemperature - 150.0);
                     }
-                    var npElectricityProduced = np.array(ElectricityProduced);
-                    var maxElectricityProduced = (double)Numpy.np.max(ElectricityProduced);
+                    var maxElectricityProduced = ElectricityProduced.Max();
                     Cplantcorrelation = CCAPP1 * Math.Pow((maxElectricityProduced / 15.0), -0.06) * maxElectricityProduced * 1000.0 / 1E6;
                 }
                 else if (simulationParms.pptype == 2) //supercritical ORC
@@ -1678,10 +1673,12 @@ namespace BlazorGeophiresSharp.Server.Core
                 var NPVitc = (1 + finParms.inflrateconstruction) * Ccap * finParms.RITC / (1 - finParms.CTR);
                 if (simulationParms.enduseoption == 1)
                 {
-                    var NPVoandm = np.sum(Coam * np.array(inflationvector) * discountvector);
+                    var NPVoandm = inflationvector.Zip(discountvector, (inflation, discount) => Coam * inflation * discount).Sum();
                     var NPVgrt = finParms.GTR / (1 - finParms.GTR) * (NPVcap + NPVoandm + NPVfc + NPVit - NPVitc);
-                    var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc) / np.sum(calcResult.NetkWhProduced * np.array(inflationvector) * discountvector) * 1E8;
-                    Price = (double)npPrice;
+                    double denominator = calcResult.NetkWhProduced.Zip(inflationvector, (netKWh, inflation) => netKWh * inflation)
+                                           .Zip(discountvector, (inflationTerm, discount) => inflationTerm * discount)
+                                           .Sum();
+                    Price = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc) / denominator * 1E8;
                 }
                 else if (simulationParms.enduseoption == 2)
                 {

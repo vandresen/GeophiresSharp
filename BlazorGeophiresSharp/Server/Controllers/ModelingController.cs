@@ -1,5 +1,6 @@
 ﻿using BlazorGeophiresSharp.Server.Core;
 using BlazorGeophiresSharp.Shared;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -29,7 +30,8 @@ namespace BlazorGeophiresSharp.Server.Controllers
             response.IsSuccess = false;
             try
             {
-                string[] lines = input.Content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                //string[] lines = input.Content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                string[] lines = input.Content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 await _mc.ReadFromRepository(lines);
                 _logger.LogInformation("Data read from repository");
                 _mc.CalculateModel();
