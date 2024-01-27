@@ -23,11 +23,11 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Publish
-        run: dotnet publish -c Release -property:PublishDir=./myapp
+        run: dotnet publish -c Release -property:PublishDir=published
 
       - name: Zip Files
         run: |
-          Compress-Archive -Path .\myapp\* -DestinationPath app.zip -Force
+          Compress-Archive -Path .\published\* -DestinationPath app.zip -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
