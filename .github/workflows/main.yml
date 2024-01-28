@@ -22,6 +22,9 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release
 
+      - name: Create Published Directory
+        run: New-Item -ItemType Directory -Path published
+
       - name: Publish
         run: dotnet publish -c Release -property:PublishDir=published
 
