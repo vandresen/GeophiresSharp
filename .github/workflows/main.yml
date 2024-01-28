@@ -32,6 +32,9 @@ jobs:
         run: |
           Compress-Archive -Path .\published\* -DestinationPath $env:GITHUB_WORKSPACE\app.zip -Force
 
+      - name: List files
+        run: dir $env:GITHUB_WORKSPACE
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
