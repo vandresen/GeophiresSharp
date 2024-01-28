@@ -20,16 +20,16 @@ jobs:
         run: dotnet restore BlazorGeophiresSharp/server/BlazorGeophiresSharp.Server.csproj
 
       - name: Build
-        run: dotnet build --configuration Release
+        run: dotnet build BlazorGeophiresSharp/server/BlazorGeophiresSharp.Server.csproj --configuration Release --no-restore
 
       - name: Create Published Directory
         run: New-Item -ItemType Directory -Path published
 
       - name: Publish
-        run: dotnet publish -c Release -property:PublishDir=published
+        run: dotnet publish BlazorGeophiresSharp/server/BlazorGeophiresSharp.Server.csproj
         
       - name: List files
-        run: dir .\published\
+        run: dir BlazorGeophiresSharp
 
       - name: List files 2
         run: dir published
