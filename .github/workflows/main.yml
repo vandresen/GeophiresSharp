@@ -28,18 +28,20 @@ jobs:
       - name: Publish
         run: dotnet publish BlazorGeophiresSharp/server/BlazorGeophiresSharp.Server.csproj
         
-      - name: List files
-        run: dir BlazorGeophiresSharp
+      
 
       - name: List files 2
-        run: dir published
+        run: dir BlazorGeophiresSharp\server\bin\Release\net8.0\publish\
 
       - name: Zip Files
         run: |
-          Compress-Archive -Path .\published\* -DestinationPath $env:GITHUB_WORKSPACE\app.zip -Force
+          Compress-Archive -Path BlazorGeophiresSharp\server\bin\Release\net8.0\publish\* -DestinationPath app.zip -Force
+
+      - name: List files
+        run: dir BlazorGeophiresSharp
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: Release
-          path: $env:GITHUB_WORKSPACE\app.zip
+          path: app.zip
