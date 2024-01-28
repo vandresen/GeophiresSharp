@@ -30,7 +30,7 @@ jobs:
 
       - name: Zip Files
         run: |
-          Compress-Archive -Path .\published\* -DestinationPath app.zip -Force
+          Compress-Archive -Path .\published\* -DestinationPath $env:GITHUB_WORKSPACE\app.zip -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
