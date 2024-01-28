@@ -17,7 +17,7 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore BlazorGeophiresSharp/server/DatabaseManager.Server.csproj
 
       - name: Build
         run: dotnet build --configuration Release
