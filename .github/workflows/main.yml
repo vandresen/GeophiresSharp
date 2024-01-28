@@ -27,13 +27,16 @@ jobs:
 
       - name: Publish
         run: dotnet publish -c Release -property:PublishDir=published
+        
+      - name: List files
+        run: dir .\published\
+
+      - name: List files 2
+        run: dir published
 
       - name: Zip Files
         run: |
           Compress-Archive -Path .\published\* -DestinationPath $env:GITHUB_WORKSPACE\app.zip -Force
-
-      - name: List files
-        run: dir .\published\
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
