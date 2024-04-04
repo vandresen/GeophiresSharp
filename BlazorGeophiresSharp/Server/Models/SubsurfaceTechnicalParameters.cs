@@ -445,5 +445,6 @@
         public int usebuiltinppwellheadcorrelation { get; set; }
         public int productionwellpumping { get; set; }
         public int usebuiltinoutletplantcorrelation { get; set; }
+        public string[] tempratureData { get; set; }
     }
 }

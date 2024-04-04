@@ -17,11 +17,15 @@
     <MudMainContent>
         <MudContainer Class="mt-5">
             <div>
-                <FileSelection FileSelected="UploadFile" />
+                <FileSelection FileSelected="UploadFile" Label="Upload File"/>
+                @if (producedTemperature)
+                {
+                    <FileSelection FileSelected="UploadTempData" Label="Upload Produced Temprature Data" />
+                }
             </div>
             <br />
             <div>
-                <MudTextField @bind-Value="FileSelection" Label="Selected File" ReadOnly="true" Variant="Variant.Outlined" />
+                <MudTextField @bind-Value="FileSelection" Label="Selected Parameter File" ReadOnly="true" Variant="Variant.Outlined" />
             </div>
             <br />
             <div>
@@ -62,10 +66,13 @@
 
 @code {
     public string FileSelection { get; set; } = "No file selected";
+    public string TempDataFileSelection { get; set; } = "No file selected";
     private SimulationParameters simParms { get; set; }
     private SubsurfaceTechnicalParameters subsurfaceParms { get; set; }
     string content = "No content";
+    string tempDataContent = "No content";
     bool closeResult = false;
+    bool producedTemperature;
 
     private async Task UploadFile(IBrowserFile file)
     {
@@ -82,20 +89,41 @@
         simParms = await sim.GetSimulationParameters(lines);
         Console.WriteLine(simParms.timestepsperyear);
         subsurfaceParms = await subsurfaceRep.GetSubsurfaceTechnicalParameters(lines, simParms);
+        producedTemperature = false;
+        if (subsurfaceParms.resoption == 5)
+        {
+            producedTemperature = true;
+        }
         Console.WriteLine(subsurfaceParms.resoption);
         StateHasChanged();
+    }
+
+    private async Task UploadTempData(IBrowserFile file)
+    {
+        TempDataFileSelection = file.Name;
+        Console.WriteLine(TempDataFileSelection);
+        using (var reader = new StreamReader(file.OpenReadStream()))
+        {
+            tempDataContent = await reader.ReadToEndAsync();
+        }
     }
 
     private async Task OpenDialog()
     {
         if (FileSelection == "No file selected")
         {
-            await displayMessage.DisplayErrorMessage("Please select a data connector");
+            await displayMessage.DisplayErrorMessage("Please select a parameter file");
+            return;
+        }
+        if (subsurfaceParms.resoption == 5 && TempDataFileSelection == "No file selected")
+        {
+            await displayMessage.DisplayErrorMessage("Please select a temprature data file");
             return;
         }
         InputParameters input = new InputParameters();
         Response result = new Response();
         input.Content = content;
+        input.TempDataContent = tempDataContent;
         var response = await Http.PostAsJsonAsync("Modeling", input);
         if (response.IsSuccessStatusCode)
         {
@@ -114,6 +142,7 @@
         }
         content = "No content";
         FileSelection = "No file selected";
-        // NavigationManager.NavigateTo($"/");
     }
+
+    
 }

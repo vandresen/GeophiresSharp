@@ -9,5 +9,6 @@ namespace BlazorGeophiresSharp.Shared
     public class InputParameters
     {
         public string Content { get; set; }
+        public string TempDataContent { get; set; }
     }
 }

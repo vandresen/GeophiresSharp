@@ -17,6 +17,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Components.Forms;
 using static MudBlazor.CategoryTypes;
 using System.Runtime.ConstrainedExecution;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace BlazorGeophiresSharp.Server.Core
 {
@@ -41,7 +42,7 @@ namespace BlazorGeophiresSharp.Server.Core
         private double Coam;
         private double Cplant = 0;
         private double[] NetElectricityProduced = { 0.0 };
-        private double[] Tresoutput;
+        private double[] Tresoutput = { 0.0 };
         private double[] ProdTempDrop = { 0.0 };
         private double[] pumpdepth;
         private double[] PumpingPower;
@@ -80,13 +81,13 @@ namespace BlazorGeophiresSharp.Server.Core
             finParms = await finRep.GetFinancialParameters(simulationParms);
         }
 
-        public void CalculateModel()
+        public void CalculateModel(string tempDataContent)
         {
             double[] intersecttemperature = CalculateMaximumWellDepth();
             _logger.LogInformation("Start calculate reservoir temprature");
             CalculateInitialReservoirTemperature(intersecttemperature);
             _logger.LogInformation("Start calculate temprature output");
-            CalculateReservoirTemperatureOutput();
+            CalculateReservoirTemperatureOutput(tempDataContent);
             _logger.LogInformation("Start calculate temprature drop");
             CalculateWellboreTemperatureDrop();
             _logger.LogInformation("Start calculate pressure");
@@ -221,7 +222,7 @@ namespace BlazorGeophiresSharp.Server.Core
             return intersecttemperature;
         }
 
-        private void CalculateReservoirTemperatureOutput()
+        private void CalculateReservoirTemperatureOutput(string tempdataContent)
         {
             // calculate reservoir temperature output (internal or external)
             // resoption = 1  Multiple parallel fractures model (LANL)                            
@@ -336,22 +337,23 @@ namespace BlazorGeophiresSharp.Server.Core
             {
 
                 Tresoutput[0] = Trock;
-                string restempfname = sstParms.filenamereservoiroutput;
-                string[] content = new string[0];
-                if (File.Exists(restempfname))
-                {
-                    content = File.ReadAllLines(restempfname);
-                }
-                else
-                {
-                    Console.WriteLine($"Error: GEOPHIRES could not read reservoir output file ({restempfname}) and will abort simulation.");
-                    Environment.Exit(1);
-                }
+                string[] content = tempdataContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                //string restempfname = sstParms.filenamereservoiroutput;
+                //string[] content = new string[0];
+                //if (File.Exists(restempfname))
+                //{
+                //    content = File.ReadAllLines(restempfname);
+                //}
+                //else
+                //{
+                //    Console.WriteLine($"Error: GEOPHIRES could not read reservoir output file ({restempfname}) and will abort simulation.");
+                //    Environment.Exit(1);
+                //}
                 int numlines = 0;
                 numlines = content.Length;
                 if (numlines != finParms.plantlifetime * simulationParms.timestepsperyear + 1)
                 {
-                    Console.WriteLine($"Error: Reservoir output file ({restempfname}) does not have required {finParms.plantlifetime * simulationParms.timestepsperyear + 1} lines. GEOPHIRES will abort simulation.'");
+                    Console.WriteLine($"Error: Reservoir output file does not have required {finParms.plantlifetime * simulationParms.timestepsperyear + 1} lines. GEOPHIRES will abort simulation.'");
                     Environment.Exit(1);
                 }
                 Tresoutput = new double[numlines];
@@ -1682,13 +1684,20 @@ namespace BlazorGeophiresSharp.Server.Core
                 }
                 else if (simulationParms.enduseoption == 2)
                 {
-                    var PumpingCosts = np.array(PumpingkWh) * ccParms.elecprice / 1E6;
-                    averageannualpumpingcosts = np.average(PumpingkWh) * ccParms.elecprice / 1E6; //M$/year
-                    var NPVoandm = np.sum((Coam + PumpingCosts) * inflationvector * discountvector);
-                    var NPVgrt = finParms.GTR / (1 - finParms.GTR) * (NPVcap + NPVoandm + NPVfc + NPVit - NPVitc);
-                    var npPrice = (NPVcap + NPVoandm + NPVfc + NPVit + NPVgrt - NPVitc) / np.sum(calcResult.HeatkWhProduced * np.array(inflationvector) * discountvector) * 1E8;
-                    npPrice = npPrice * 2.931; //$/MMBTU
-                    Price = (double)npPrice;
+                    //var PumpingCosts = np.array(PumpingkWh) * ccParms.elecprice / 1E6;
+                    var PumpingCosts = PumpingkWh.Select(kWh => kWh * ccParms.elecprice / 1E6).ToArray();
+                    averageannualpumpingcosts = Utilities.Average(PumpingkWh) * ccParms.elecprice / 1E6; //M$/year
+                    //var NPVoandm = np.sum((Coam + np.array(PumpingCosts)) * inflationvector * discountvector);
+                    var tempArray = PumpingCosts.Select(cost => Coam + cost).ToArray();
+                    var Voandm = tempArray.Zip(inflationvector, (temp, inflation) => temp * inflation)
+                           .Zip(discountvector, (product, discount) => product * discount)
+                           .Sum();
+                    var Vgrt = finParms.GTR / (1 - finParms.GTR) * (NPVcap + Voandm + NPVfc + NPVit - NPVitc);
+                    var sum = calcResult.HeatkWhProduced.Zip(inflationvector, (heat, inflation) => heat * inflation)
+                                 .Zip(discountvector, (product, discount) => product * discount)
+                                 .Sum();
+                    var npPrice = (NPVcap + Voandm + NPVfc + NPVit + Vgrt - NPVitc) / sum * 1E8;
+                    Price = npPrice * 2.931; //$/MMBTU
                 }
                 else if (simulationParms.enduseoption > 2)
                 {

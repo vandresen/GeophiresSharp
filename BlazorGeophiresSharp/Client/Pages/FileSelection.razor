@@ -5,13 +5,14 @@
                    Color="Color.Primary"
                    StartIcon="@Icons.Material.Filled.CloudUpload"
                    for="@context">
-            Upload File
+            @Label
         </MudButton>
     </ButtonTemplate>
 </MudFileUpload>
 
 @code {
     [Parameter] public EventCallback<IBrowserFile> FileSelected { get; set; }
+    [Parameter] public string Label { get; set; }
 
     private async Task Selected(IBrowserFile file)
     {

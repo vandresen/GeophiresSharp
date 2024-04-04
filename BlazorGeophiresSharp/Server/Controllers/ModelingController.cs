@@ -34,7 +34,7 @@ namespace BlazorGeophiresSharp.Server.Controllers
                 string[] lines = input.Content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 await _mc.ReadFromRepository(lines);
                 _logger.LogInformation("Data read from repository");
-                _mc.CalculateModel();
+                _mc.CalculateModel(input.TempDataContent);
                 _logger.LogInformation("Model created");
                 string result = await _mc.CreateReport();
                 response.Result = result;
