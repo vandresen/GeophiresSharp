@@ -9,10 +9,10 @@ jobs:
     steps:
 
       # Checkout the repo
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -30,7 +30,7 @@ jobs:
           Compress-Archive -Path BlazorGeophiresSharp\server\bin\Release\net8.0\publish\* -DestinationPath app.zip -Force
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Release
           path: app.zip
