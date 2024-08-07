@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
-    <PackageReference Include="Numpy" Version="3.11.1.33" />
   </ItemGroup>
 
   <ItemGroup>

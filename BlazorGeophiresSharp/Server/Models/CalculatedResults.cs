@@ -1,6 +1,4 @@
-﻿using Numpy;
-
-namespace BlazorGeophiresSharp.Server.Models
+﻿namespace BlazorGeophiresSharp.Server.Models
 {
     public class CalculatedResults
     {

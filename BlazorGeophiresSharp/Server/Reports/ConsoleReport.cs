@@ -1,6 +1,5 @@
 ﻿using BlazorGeophiresSharp.Server.Core;
 using BlazorGeophiresSharp.Server.Models;
-using Numpy;
 using System;
 using System.Linq;
 using System.Text;

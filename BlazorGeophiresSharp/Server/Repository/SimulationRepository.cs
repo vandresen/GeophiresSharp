@@ -1,7 +1,6 @@
 ﻿using BlazorGeophiresSharp.Server.Extensions;
 using BlazorGeophiresSharp.Server.Models;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

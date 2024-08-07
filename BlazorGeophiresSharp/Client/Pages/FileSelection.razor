@@ -1,13 +1,12 @@
 ﻿<MudFileUpload T="IBrowserFile" FilesChanged="Selected">
-    <ButtonTemplate>
+    <ActivatorContent>
         <MudButton HtmlTag="label"
                    Variant="Variant.Filled"
                    Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.CloudUpload"
-                   for="@context">
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
             @Label
         </MudButton>
-    </ButtonTemplate>
+    </ActivatorContent>
 </MudFileUpload>
 
 @code {
