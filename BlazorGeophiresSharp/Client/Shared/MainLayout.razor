@@ -1,6 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @inject ISimulationRepository sim
 @inject ISubsurfaceTechnicalRepository subsurfaceRep
+@inject ISurfaceTechnicalRepository surfaceRep
+@inject IFinancialRepository financials
+@inject ICapitalAndOMCostRepository capital
 @inject IDisplayMessage displayMessage
 @inject HttpClient Http
 @inject IDialogService DialogService
@@ -48,13 +51,13 @@
                                 <SubsurfaceTechnical Parms="subsurfaceParms" />
                                 </MudTabPanel>
                                 <MudTabPanel Text="Surface Technical Parameters">
-                                    <SurfaceTechnical />
+                                    <SurfaceTechnical Parms="surfaceParms"/>
                                 </MudTabPanel>
                                 <MudTabPanel Text="Financial Parameters">
-                                    <Financial />
+                                    <Financial Parms="financialParms"/>
                                 </MudTabPanel>
                                 <MudTabPanel Text="Capital and O&M Cost Parameters">
-                                    <CapitalCost />
+                                    <CapitalCost Parms="capitalParms"/>
                                 </MudTabPanel>
                             </MudTabs>
                         }                
@@ -69,6 +72,9 @@
     public string TempDataFileSelection { get; set; } = "No file selected";
     private SimulationParameters simParms { get; set; }
     private SubsurfaceTechnicalParameters subsurfaceParms { get; set; }
+    private SurfaceTechnicalParameters surfaceParms { get; set; }
+    private FinancialParameters financialParms { get; set; }
+    private CapitalAndOMCostParameters capitalParms { get; set; }
     string content = "No content";
     string tempDataContent = "No content";
     bool closeResult = false;
@@ -95,6 +101,9 @@
             producedTemperature = true;
         }
         Console.WriteLine(subsurfaceParms.resoption);
+        surfaceParms = await surfaceRep.GetSurfaceTechnicalParameters(lines, subsurfaceParms);
+        financialParms = await financials.GetFinancialParameters(lines, simParms);
+        capitalParms = await capital.GetCapitalAndOMCostParameters(lines, simParms);
         StateHasChanged();
     }
 

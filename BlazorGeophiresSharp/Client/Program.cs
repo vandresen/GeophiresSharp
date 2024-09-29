@@ -26,6 +26,9 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<IDisplayMessage, DisplayMessage>();
 //builder.Services.AddScoped<SimulationParameters>();
 builder.Services.AddScoped<ISimulationRepository, SimulationRepository>();
+builder.Services.AddScoped<ISurfaceTechnicalRepository, SurfaceTechnicalRepository>();
 builder.Services.AddScoped<ISubsurfaceTechnicalRepository, SubsurfaceTechnicalRepository>();
+builder.Services.AddScoped<ICapitalAndOMCostRepository, CapitalAndOMCostRepository>();
+builder.Services.AddScoped<IFinancialRepository, FinancialRepository>();
 
 await builder.Build().RunAsync();
