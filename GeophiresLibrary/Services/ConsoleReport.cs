@@ -23,7 +23,7 @@ namespace GeophiresLibrary.Services
             return reportBuilder.ToString();
         }
 
-        public async Task CapitalCostReport(CapitalAndOMCostParameters ccParms, SubsurfaceTechnicalParameters sstParms,
+        public void CapitalCostReport(CapitalAndOMCostParameters ccParms, SubsurfaceTechnicalParameters sstParms,
             FinancialParameters finParms, CalculatedResults calcResult, SimulationParameters simParms)
         {
             HeaderOutput("***CAPITAL COSTS (M$)***");
@@ -77,7 +77,7 @@ namespace GeophiresLibrary.Services
             reportOutput($"    Capacity factor (%)                              " + (stParms.utilfactor * 100).ToString("F1"));
         }
 
-        public async Task EnergyGenerationProfileReport(SimulationParameters simParms, FinancialParameters finParms,
+        public void EnergyGenerationProfileReport(SimulationParameters simParms, FinancialParameters finParms,
             CalculatedResults calcResult)
         {
             reportOutput("");
@@ -147,7 +147,7 @@ namespace GeophiresLibrary.Services
             }
         }
 
-        public async Task EngineeringReport(SubsurfaceTechnicalParameters sstParms, SurfaceTechnicalParameters stParms,
+        public void EngineeringReport(SubsurfaceTechnicalParameters sstParms, SurfaceTechnicalParameters stParms,
             SimulationParameters simParms, CalculatedResults calcResult)
         {
             HeaderOutput("***ENGINEERING PARAMETERS***");
@@ -191,7 +191,7 @@ namespace GeophiresLibrary.Services
             reportOutput($"");
         }
 
-        public async Task OperatingMaintenanceCostReport(SimulationParameters simParms, CapitalAndOMCostParameters ccParms,
+        public void OperatingMaintenanceCostReport(SimulationParameters simParms, CapitalAndOMCostParameters ccParms,
             CalculatedResults calcResult)
         {
             HeaderOutput("***OPERATING AND MAINTENANCE COSTS (M$/yr)***");
@@ -213,7 +213,7 @@ namespace GeophiresLibrary.Services
             }
         }
 
-        public async Task PowerGenerationProfileReport(SimulationParameters simParms, FinancialParameters finParms,
+        public void PowerGenerationProfileReport(SimulationParameters simParms, FinancialParameters finParms,
             CalculatedResults calcResult)
         {
             reportOutput($"");
@@ -275,7 +275,7 @@ namespace GeophiresLibrary.Services
             reportOutput("");
         }
 
-        public async Task PowerGenerationReport(SimulationParameters simParms, SubsurfaceTechnicalParameters sstParms,
+        public void PowerGenerationReport(SimulationParameters simParms, SubsurfaceTechnicalParameters sstParms,
             CalculatedResults calcResult)
         {
             HeaderOutput("***POWER GENERATION RESULTS***");
@@ -316,7 +316,7 @@ namespace GeophiresLibrary.Services
             }
         }
 
-        public async Task ReservoirReport(SubsurfaceTechnicalParameters sstParms, CalculatedResults calcResult)
+        public void ReservoirReport(SubsurfaceTechnicalParameters sstParms, CalculatedResults calcResult)
         {
             HeaderOutput("***RESERVOIR PARAMETERS***");
             if (sstParms.resoption == 1)
@@ -439,7 +439,7 @@ namespace GeophiresLibrary.Services
             }
         }
 
-        public async Task ResourceCharacteristicsReport(SubsurfaceTechnicalParameters sstParms)
+        public void ResourceCharacteristicsReport(SubsurfaceTechnicalParameters sstParms)
         {
             HeaderOutput("***RESOURCE CHARACTERISTICS***");
             reportOutput($"    Maximum reservoir temperature (deg.C)            {sstParms.Tmax}");

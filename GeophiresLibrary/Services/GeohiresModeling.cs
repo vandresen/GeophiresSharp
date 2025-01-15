@@ -72,14 +72,14 @@ namespace GeophiresLibrary.Services
             IReport report = new ConsoleReport();
             report.SummaryReport(simulationParms, sstParms, calcResult);
             report.EconomicReport(finParms, stParms);
-            await report.EngineeringReport(sstParms, stParms, simulationParms, calcResult);
-            await report.ResourceCharacteristicsReport(sstParms);
-            await report.ReservoirReport(sstParms, calcResult);
-            await report.CapitalCostReport(ccParms, sstParms, finParms, calcResult, simulationParms);
-            await report.OperatingMaintenanceCostReport(simulationParms, ccParms, calcResult);
-            await report.PowerGenerationReport(simulationParms, sstParms, calcResult);
-            await report.PowerGenerationProfileReport(simulationParms, finParms, calcResult);
-            await report.EnergyGenerationProfileReport(simulationParms, finParms, calcResult);
+            report.EngineeringReport(sstParms, stParms, simulationParms, calcResult);
+            report.ResourceCharacteristicsReport(sstParms);
+            report.ReservoirReport(sstParms, calcResult);
+            report.CapitalCostReport(ccParms, sstParms, finParms, calcResult, simulationParms);
+            report.OperatingMaintenanceCostReport(simulationParms, ccParms, calcResult);
+            report.PowerGenerationReport(simulationParms, sstParms, calcResult);
+            report.PowerGenerationProfileReport(simulationParms, finParms, calcResult);
+            report.EnergyGenerationProfileReport(simulationParms, finParms, calcResult);
             string reportOutput = report.GetReport();
             return reportOutput;
         }
