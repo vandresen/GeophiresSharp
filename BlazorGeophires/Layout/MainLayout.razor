@@ -101,7 +101,7 @@
         }
         Console.WriteLine(subsurfaceParms.resoption);
         surfaceParms = await surfaceRep.GetSurfaceTechnicalParameters(lines, subsurfaceParms);
-        financialParms = await financials.GetFinancialParameters(lines, simParms);
+        financialParms = financials.GetFinancialParameters(lines, simParms);
         capitalParms = await capital.GetCapitalAndOMCostParameters(lines, simParms);
         StateHasChanged();
     }

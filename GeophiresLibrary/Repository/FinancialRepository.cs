@@ -10,7 +10,7 @@ namespace GeophiresLibrary.Repository
 {
     public class FinancialRepository : IFinancialRepository
     {
-        public async Task<FinancialParameters> GetFinancialParameters(string[] _content, SimulationParameters simulationParms)
+        public FinancialParameters GetFinancialParameters(string[] _content, SimulationParameters simulationParms)
         {
             var finParms = new FinancialParameters();
 

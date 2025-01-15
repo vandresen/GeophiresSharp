@@ -9,6 +9,6 @@ namespace GeophiresLibrary.Repository
 {
     public interface IFinancialRepository
     {
-        Task<FinancialParameters> GetFinancialParameters(string[] _content, SimulationParameters simulationParms);
+        FinancialParameters GetFinancialParameters(string[] _content, SimulationParameters simulationParms);
     }
 }
