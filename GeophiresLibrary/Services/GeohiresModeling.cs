@@ -70,8 +70,8 @@ namespace GeophiresLibrary.Services
         public async Task<string> CreateReport()
         {
             IReport report = new ConsoleReport();
-            await report.SummaryReport(simulationParms, sstParms, calcResult);
-            await report.EconomicReport(finParms, stParms);
+            report.SummaryReport(simulationParms, sstParms, calcResult);
+            report.EconomicReport(finParms, stParms);
             await report.EngineeringReport(sstParms, stParms, simulationParms, calcResult);
             await report.ResourceCharacteristicsReport(sstParms);
             await report.ReservoirReport(sstParms, calcResult);

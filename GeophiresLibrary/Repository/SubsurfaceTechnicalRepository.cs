@@ -13,7 +13,7 @@ namespace GeophiresLibrary.Repository
             _logger = logger;
         }
 
-        public async Task<SubsurfaceTechnicalParameters> GetSubsurfaceTechnicalParameters(string[] _content, SimulationParameters simulationParms)
+        public SubsurfaceTechnicalParameters GetSubsurfaceTechnicalParameters(string[] _content, SimulationParameters simulationParms)
         {
             var sstParms = new SubsurfaceTechnicalParameters();
 

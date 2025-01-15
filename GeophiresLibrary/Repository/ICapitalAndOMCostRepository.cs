@@ -9,6 +9,6 @@ namespace GeophiresLibrary.Repository
 {
     public interface ICapitalAndOMCostRepository
     {
-        Task<CapitalAndOMCostParameters> GetCapitalAndOMCostParameters(string[] _content, SimulationParameters simulationParms);
+        CapitalAndOMCostParameters GetCapitalAndOMCostParameters(string[] _content, SimulationParameters simulationParms);
     }
 }

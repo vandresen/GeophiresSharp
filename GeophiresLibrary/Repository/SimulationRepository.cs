@@ -13,7 +13,7 @@ namespace GeophiresLibrary.Repository
             _logger = logger;
         }
 
-        public async Task<SimulationParameters> GetSimulationParameters(string[] _content)
+        public SimulationParameters GetSimulationParameters(string[] _content)
         {
             _logger.LogInformation("This is a test");
             var simulationParms = new SimulationParameters();

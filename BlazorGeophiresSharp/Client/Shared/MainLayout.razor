@@ -92,18 +92,18 @@
         }
         string[] lines = content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
         Console.WriteLine($"Number of lines in file is {lines.Length}");
-        simParms = await sim.GetSimulationParameters(lines);
+        simParms = sim.GetSimulationParameters(lines);
         Console.WriteLine(simParms.timestepsperyear);
-        subsurfaceParms = await subsurfaceRep.GetSubsurfaceTechnicalParameters(lines, simParms);
+        subsurfaceParms = subsurfaceRep.GetSubsurfaceTechnicalParameters(lines, simParms);
         producedTemperature = false;
         if (subsurfaceParms.resoption == 5)
         {
             producedTemperature = true;
         }
         Console.WriteLine(subsurfaceParms.resoption);
-        surfaceParms = await surfaceRep.GetSurfaceTechnicalParameters(lines, subsurfaceParms);
+        surfaceParms = surfaceRep.GetSurfaceTechnicalParameters(lines, subsurfaceParms);
         financialParms = financials.GetFinancialParameters(lines, simParms);
-        capitalParms = await capital.GetCapitalAndOMCostParameters(lines, simParms);
+        capitalParms = capital.GetCapitalAndOMCostParameters(lines, simParms);
         StateHasChanged();
     }
 

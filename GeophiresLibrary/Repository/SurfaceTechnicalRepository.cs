@@ -17,7 +17,7 @@ namespace GeophiresLibrary.Repository
         {
             _logger = logger;
         }
-        public async Task<SurfaceTechnicalParameters> GetSurfaceTechnicalParameters(string[] _content, SubsurfaceTechnicalParameters sstParms)
+        public SurfaceTechnicalParameters GetSurfaceTechnicalParameters(string[] _content, SubsurfaceTechnicalParameters sstParms)
         {
             var surfTechParms = new SurfaceTechnicalParameters();
 

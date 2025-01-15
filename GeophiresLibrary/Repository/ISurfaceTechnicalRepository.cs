@@ -9,6 +9,6 @@ namespace GeophiresLibrary.Repository
 {
     public interface ISurfaceTechnicalRepository
     {
-        Task<SurfaceTechnicalParameters> GetSurfaceTechnicalParameters(string[] _content, SubsurfaceTechnicalParameters sstParms);
+        SurfaceTechnicalParameters GetSurfaceTechnicalParameters(string[] _content, SubsurfaceTechnicalParameters sstParms);
     }
 }

@@ -10,8 +10,8 @@ namespace GeophiresLibrary.Services
     public interface IReport
     {
         string GetReport();
-        Task SummaryReport(SimulationParameters simParms, SubsurfaceTechnicalParameters sstParms, CalculatedResults calcResult);
-        Task EconomicReport(FinancialParameters finParms, SurfaceTechnicalParameters stParms);
+        void SummaryReport(SimulationParameters simParms, SubsurfaceTechnicalParameters sstParms, CalculatedResults calcResult);
+        void EconomicReport(FinancialParameters finParms, SurfaceTechnicalParameters stParms);
         Task EngineeringReport(SubsurfaceTechnicalParameters sstParms, SurfaceTechnicalParameters stParms,
             SimulationParameters simParms, CalculatedResults calcResult);
         Task ResourceCharacteristicsReport(SubsurfaceTechnicalParameters sstParms);

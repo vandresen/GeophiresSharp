@@ -4,6 +4,6 @@ namespace GeophiresLibrary.Repository
 {
     public interface ISimulationRepository
     {
-        Task<SimulationParameters> GetSimulationParameters(string[] _content);
+        SimulationParameters GetSimulationParameters(string[] _content);
     }
 }

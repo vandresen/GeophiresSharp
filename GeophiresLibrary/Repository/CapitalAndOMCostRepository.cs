@@ -18,7 +18,7 @@ namespace GeophiresLibrary.Repository
             _logger = logger;
         }
 
-        public async Task<CapitalAndOMCostParameters> GetCapitalAndOMCostParameters(string[] _content, SimulationParameters simulationParms)
+        public CapitalAndOMCostParameters GetCapitalAndOMCostParameters(string[] _content, SimulationParameters simulationParms)
         {
             var capCostParms = new CapitalAndOMCostParameters();
 

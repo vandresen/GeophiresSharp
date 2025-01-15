@@ -55,7 +55,7 @@ namespace GeophiresLibrary.Services
 
         }
 
-        public async Task EconomicReport(FinancialParameters finParms, SurfaceTechnicalParameters stParms)
+        public void EconomicReport(FinancialParameters finParms, SurfaceTechnicalParameters stParms)
         {
             HeaderOutput("***ECONOMIC PARAMETERS***");
             if (finParms.econmodel == 1)
@@ -474,7 +474,7 @@ namespace GeophiresLibrary.Services
             }
         }
 
-        public async Task SummaryReport(SimulationParameters simParms, SubsurfaceTechnicalParameters sstParms,
+        public void SummaryReport(SimulationParameters simParms, SubsurfaceTechnicalParameters sstParms,
             CalculatedResults calcResult)
         {
             MainHeaderOutput();
