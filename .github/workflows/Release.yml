@@ -17,17 +17,17 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Install dependencies
-        run: dotnet restore BlazorGeophiresSharp/server/BlazorGeophiresSharp.Server.csproj
+        run: dotnet restore BlazorGeophires/BlazorGeophires.csproj
 
       - name: Build
-        run: dotnet build BlazorGeophiresSharp/server/BlazorGeophiresSharp.Server.csproj --configuration Release --no-restore
+        run: dotnet build BlazorGeophires/BlazorGeophires.csproj --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish BlazorGeophiresSharp/server/BlazorGeophiresSharp.Server.csproj
+        run: dotnet publish BlazorGeophires/BlazorGeophires.csproj
 
       - name: Create zip File
         run: |
-          Compress-Archive -Path BlazorGeophiresSharp\server\bin\Release\net8.0\publish\* -DestinationPath app.zip -Force
+          Compress-Archive -Path BlazorGeophires\bin\Release\net8.0\publish\* -DestinationPath app.zip -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
