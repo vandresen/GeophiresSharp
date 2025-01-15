@@ -1,0 +1,30 @@
+﻿<MudTextField @bind-Value="circulationPumpEfficiency" Label="Circulation Pump Efficiency" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="utilizationFactor" Label="Utilization Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="endUseEfficiencyFactor" Label="End-Use Efficiency Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="CHPFraction" Label="CHP Fraction" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="CHPBottomingEnteringTemperature" Label="CHP Bottoming Entering Temperature" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="surfaceTemperature" Label="Surface Temperature" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="ambientTemperature" Label="Ambient Temperature" ReadOnly="true" Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public SurfaceTechnicalParameters Parms { get; set; }
+
+    private double circulationPumpEfficiency;
+    private double utilizationFactor;
+    private double endUseEfficiencyFactor;
+    private double CHPFraction;
+    private double CHPBottomingEnteringTemperature;
+    private double surfaceTemperature;
+    private double ambientTemperature;
+
+    protected override void OnParametersSet()
+    {
+        circulationPumpEfficiency = Parms.pumpeff;
+        utilizationFactor = Parms.utilfactor;
+        endUseEfficiencyFactor = Parms.enduseefficiencyfactor;
+        CHPFraction = Parms.chpfraction;
+        CHPBottomingEnteringTemperature = Parms.Tchpbottom;
+        surfaceTemperature = Parms.Tsurf;
+        ambientTemperature = Parms.Tenv;
+    }
+}

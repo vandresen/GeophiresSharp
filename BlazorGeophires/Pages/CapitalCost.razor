@@ -1,0 +1,84 @@
+﻿<MudTextField @bind-Value="totalCapitalCost" Label="Total Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="wellDrillingCompletionCapitalCost" Label="Well Drilling and Completion Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="wellDrillingCompletionCapitalCostAdjustmentFactor" Label="Well Drilling and Completion Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="wellDrillingCostCorrelation" Label="Well Drilling Cost Correlation" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="reservoirStimulationCapitalCost" Label="Reservoir Stimulation Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="reservoirStimulationCapitalCostAdjustmentFactor" Label="Reservoir Stimulation Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="surfacePlantCapitalCost" Label="Surface Plant Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value=" surfacePlantCapitalCostAdjustmentFactor" Label="Surface Plant Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="fieldGatheringSystemCapitalCost" Label="Field Gathering System Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="fieldGatheringSystemCapitalCostAdjustmentFactor" Label="Field Gathering System Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="explorationCapitalCost" Label="Exploration Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="explorationCapitalCostAdjustmentFactor" Label="Exploration Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="totalOMCost" Label="Total O and M Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="wellfieldOMCost" Label="Wellfield O and M Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="wellfieldOMCostAdjustmentFactor" Label="Wellfield O and M Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="surfacePlantOMCost" Label="Surface Plant O and M Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="surfacePlantOMCostAdjustmentFactor" Label="Surface Plant O and M Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="waterCost" Label="Water Cost" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="waterCostAdjustmentFactor" Label="Water Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="electricityRate" Label="Electricity Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="heatRate" Label="Heat Rate" ReadOnly="true" Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public CapitalAndOMCostParameters Parms { get; set; }
+
+    private double? totalCapitalCost;
+    private double? wellDrillingCompletionCapitalCost;
+    private double wellDrillingCompletionCapitalCostAdjustmentFactor;
+    private int wellDrillingCostCorrelation;
+    private double? reservoirStimulationCapitalCost;
+    private double reservoirStimulationCapitalCostAdjustmentFactor;
+    private double? surfacePlantCapitalCost;
+    private double surfacePlantCapitalCostAdjustmentFactor;
+    private double? fieldGatheringSystemCapitalCost;
+    private double fieldGatheringSystemCapitalCostAdjustmentFactor;
+    private double? explorationCapitalCost;
+    private double explorationCapitalCostAdjustmentFactor;
+    private double? totalOMCost;
+    private double? wellfieldOMCost;
+    private double wellfieldOMCostAdjustmentFactor;
+    private double? surfacePlantOMCost;
+    private double surfacePlantOMCostAdjustmentFactor;
+    private double? waterCost;
+    private double waterCostAdjustmentFactor;
+    private double? electricityRate;
+    private double? heatRate;
+
+    protected override void OnParametersSet()
+    {
+        totalCapitalCost = Parms.TotalCapitalCost;
+        if (totalCapitalCost == -1) totalCapitalCost = null;
+        wellDrillingCompletionCapitalCost = Parms.ccwellfixed;
+        if (wellDrillingCompletionCapitalCost == -1) wellDrillingCompletionCapitalCost = null;
+        wellDrillingCompletionCapitalCostAdjustmentFactor = Parms.ccwelladjfactor;
+        wellDrillingCostCorrelation = Parms.wellcorrelation;
+        reservoirStimulationCapitalCost = Parms.ccstimfixed;
+        if (reservoirStimulationCapitalCost == -1) reservoirStimulationCapitalCost = null;
+        reservoirStimulationCapitalCostAdjustmentFactor = Parms.ccstimadjfactor;
+        surfacePlantCapitalCost = Parms.ccplantfixed;
+        if (surfacePlantCapitalCost == -1) surfacePlantCapitalCost = null;
+        surfacePlantCapitalCostAdjustmentFactor = Parms.ccplantadjfactor;
+        fieldGatheringSystemCapitalCost = Parms.ccgathfixed;
+        if (fieldGatheringSystemCapitalCost == -1) fieldGatheringSystemCapitalCost = null;
+        fieldGatheringSystemCapitalCostAdjustmentFactor = Parms.ccgathadjfactor;
+        explorationCapitalCost = Parms.ccexplfixed;
+        if (explorationCapitalCost == -1) explorationCapitalCost = null;
+        explorationCapitalCostAdjustmentFactor = Parms.ccexpladjfactor;
+        totalOMCost = Parms.oamtotalfixed;
+        if (totalOMCost == -1) totalOMCost = null;
+        wellfieldOMCost = Parms.oamwellfixed;
+        if (wellfieldOMCost == -1) wellfieldOMCost = null;
+        wellfieldOMCostAdjustmentFactor = Parms.oamwelladjfactor;
+        surfacePlantOMCost = Parms.oamplantfixed;
+        if (surfacePlantOMCost == -1) surfacePlantOMCost = null;
+        surfacePlantOMCostAdjustmentFactor = Parms.oamplantadjfactor;
+        waterCost = Parms.oamwaterfixed;
+        if (waterCost == -1) waterCost = null;
+        waterCostAdjustmentFactor = Parms.oamwateradjfactor;
+        electricityRate = Parms.elecprice;
+        if (electricityRate == -1) electricityRate = null;
+        heatRate = Parms.heatprice;
+        if (heatRate == -1) heatRate = null;
+    }
+}

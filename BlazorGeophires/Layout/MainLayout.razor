@@ -4,9 +4,7 @@
 @inject ISurfaceTechnicalRepository surfaceRep
 @inject IFinancialRepository financials
 @inject ICapitalAndOMCostRepository capital
-@inject IDisplayMessage displayMessage
-@inject HttpClient Http
-@inject IDialogService DialogService
+@inject IModeling gm
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -68,17 +66,18 @@
 </MudLayout>
 
 @code {
+    [Inject] private IDialogService DialogService { get; set; }
+    bool producedTemperature;
     public string FileSelection { get; set; } = "No file selected";
+    string content = "No content";
     public string TempDataFileSelection { get; set; } = "No file selected";
+    string tempDataContent = "No content";
+    bool closeResult = false;
     private SimulationParameters simParms { get; set; }
     private SubsurfaceTechnicalParameters subsurfaceParms { get; set; }
     private SurfaceTechnicalParameters surfaceParms { get; set; }
     private FinancialParameters financialParms { get; set; }
     private CapitalAndOMCostParameters capitalParms { get; set; }
-    string content = "No content";
-    string tempDataContent = "No content";
-    bool closeResult = false;
-    bool producedTemperature;
 
     private async Task UploadFile(IBrowserFile file)
     {
@@ -121,26 +120,31 @@
     {
         if (FileSelection == "No file selected")
         {
-            await displayMessage.DisplayErrorMessage("Please select a parameter file");
+            await DialogService.ShowMessageBox(
+                "File Selection Error",
+                "Please select a parameter file.",
+                yesText: "OK"
+            );
             return;
         }
         if (subsurfaceParms.resoption == 5 && TempDataFileSelection == "No file selected")
         {
-            await displayMessage.DisplayErrorMessage("Please select a temprature data file");
+            await DialogService.ShowMessageBox(
+                "Temprature Data Error",
+                "Please select a temprature data file.",
+                yesText: "OK"
+            );
             return;
         }
-        BlazorGeophiresSharp.Shared.InputParameters input = new BlazorGeophiresSharp.Shared.InputParameters();
-        Response result = new Response();
+        InputParameters input = new InputParameters();
         input.Content = content;
         input.TempDataContent = tempDataContent;
-        var response = await Http.PostAsJsonAsync("Modeling", input);
-        if (response.IsSuccessStatusCode)
-        {
-            result = await response.Content.ReadFromJsonAsync<Response>();
-            Console.WriteLine(result.Result);
-        }
-
-        string outputContent = result.Result.ToString();
+        input.surfaceParms = surfaceParms;
+        input.subsurfaceParms = subsurfaceParms;
+        input.financialParms = financialParms;
+        input.capitalParms = capitalParms;
+        input.simParms = simParms;
+        string outputContent = await gm.Modeling(input);
         var options = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
         var parameters = new DialogParameters { ["content"] = outputContent };
         var output = await DialogService.Show<ModelResults>("Model Results", parameters, options).Result;
@@ -152,6 +156,4 @@
         content = "No content";
         FileSelection = "No file selected";
     }
-
-    
 }

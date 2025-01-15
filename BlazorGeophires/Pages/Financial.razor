@@ -1,0 +1,48 @@
+﻿<MudTextField @bind-Value="plantLifetime" Label="Plant Lifetime" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="economicModel" Label="Economic Model" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="fixedChargeRate" Label="Fixed Charge Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="discountRate" Label="Discount Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="fractionInvestmentBonds" Label="Fraction of Investment in Bonds" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="inflatedBondInterestRate" Label="Inflated Bond Interest Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="inflatedEquityInterestRate" Label="Inflated Equity Interest Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="inflationRate" Label="Inflation Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="combinedIncomeTaxRate" Label="Combined Income Tax Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="grossRevenueTaxRate" Label="Gross Revenue Tax Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="investmentTaxCreditRate" Label="Investment Tax Credit Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="propertyTaxRate" Label="Property Tax Rate" ReadOnly="true" Variant="Variant.Outlined" />
+<MudTextField @bind-Value="inflationRateDuringConstruction" Label="Inflation Rate During Construction" ReadOnly="true" Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public FinancialParameters Parms { get; set; }
+
+    private int plantLifetime;
+    private int economicModel;
+    private double fixedChargeRate;
+    private double discountRate;
+    private double fractionInvestmentBonds;
+    private double inflatedBondInterestRate;
+    private double inflatedEquityInterestRate;
+    private double inflationRate;
+    private double combinedIncomeTaxRate;
+    private double grossRevenueTaxRate;
+    private double investmentTaxCreditRate;
+    private double propertyTaxRate;
+    private double inflationRateDuringConstruction;
+
+    protected override void OnParametersSet()
+    {
+        plantLifetime = Parms.plantlifetime;
+        economicModel = Parms.econmodel;
+        fixedChargeRate = Parms.FCR;
+        discountRate = Parms.discountrate;
+        fractionInvestmentBonds = Parms.FIB;
+        inflatedBondInterestRate = Parms.BIR;
+        inflatedEquityInterestRate = Parms.EIR;
+        inflationRate = Parms.RINFL;
+        combinedIncomeTaxRate = Parms.CTR;
+        grossRevenueTaxRate = Parms.GTR;
+        investmentTaxCreditRate = Parms.RITC;
+        propertyTaxRate = Parms.PTR;
+        inflationRateDuringConstruction = Parms.inflrateconstruction;
+    }
+}

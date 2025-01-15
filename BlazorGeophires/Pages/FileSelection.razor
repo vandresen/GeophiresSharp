@@ -1,0 +1,22 @@
+﻿<MudFileUpload T="IBrowserFile" FilesChanged="Selected">
+    <ActivatorContent>
+        <MudButton HtmlTag="label"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
+            @Label
+        </MudButton>
+    </ActivatorContent>
+</MudFileUpload>
+
+@code {
+    [Parameter] public EventCallback<IBrowserFile> FileSelected { get; set; }
+    [Parameter] public string Label { get; set; }
+
+    private async Task Selected(IBrowserFile file)
+    {
+        string fileName = file.Name;
+        Console.WriteLine(fileName);
+        await FileSelected.InvokeAsync(file);
+    }
+}

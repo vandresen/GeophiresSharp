@@ -173,5 +173,17 @@ namespace GeophiresLibrary.Extensions
 
             return newArray;
         }
+
+        public static double[] SubtractArrays(this double[] array1, double[] array2)
+        {
+            if (array2.Length == 1)
+            {
+                return array1.Select(num => num - array2[0]).ToArray();
+            }
+            else
+            {
+                return array1.Zip(array2, (num1, num2) => num1 - num2).ToArray();
+            }
+        }
     }
 }
