@@ -46,19 +46,19 @@ namespace GeophiresLibrary.Services
             calcResult = new CalculatedResults();
         }
 
-        public async Task<string> Modeling(InputParameters input)
+        public string Modeling(InputParameters input)
         {
             string result = "";
             ProdTempDrop = [0.0];
-            await ReadFromRepository(input);
+            ReadFromRepository(input);
             CalculateModel(input.TempDataContent);
             Console.WriteLine("Model created");
-            result = await CreateReport();
+            result = CreateReport();
             Console.WriteLine("Report created");
             return result;
         }
 
-        public async Task ReadFromRepository(InputParameters input)
+        public void ReadFromRepository(InputParameters input)
         {
             simulationParms = input.simParms;
             sstParms = input.subsurfaceParms;
@@ -67,7 +67,7 @@ namespace GeophiresLibrary.Services
             ccParms = input.capitalParms;
         }
 
-        public async Task<string> CreateReport()
+        public string CreateReport()
         {
             IReport report = new ConsoleReport();
             report.SummaryReport(simulationParms, sstParms, calcResult);

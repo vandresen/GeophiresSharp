@@ -9,6 +9,6 @@ namespace GeophiresLibrary.Services
 {
     public interface IModeling
     {
-        Task<string> Modeling(InputParameters input);
+        string Modeling(InputParameters input);
     }
 }

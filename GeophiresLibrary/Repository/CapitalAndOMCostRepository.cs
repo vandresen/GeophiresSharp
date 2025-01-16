@@ -23,12 +23,10 @@ namespace GeophiresLibrary.Repository
             var capCostParms = new CapitalAndOMCostParameters();
 
             int totalcapcostvalid = 1;
-            int totalcapcostprovided = 1;
             double totalcapcost = _content.GetDoubleParameter("Total Capital Cost,", -1.0, 0.0, 1000.0);
             if (totalcapcost < 0)
             {
                 totalcapcostvalid = 0;
-                totalcapcostprovided = 0;
             }
             capCostParms.TotalCapitalCost = totalcapcost;
             capCostParms.totalcapcostvalid = totalcapcostvalid;
@@ -298,12 +296,10 @@ namespace GeophiresLibrary.Repository
             // O&M cost parameters
             // oamtotalfixed: total O&M cost in M$/year
             // user can provide total O&M cost (M$)
-            int oamtotalfixedprovided = 1;
             int oamtotalfixedvalid = 1;
             double oamtotalfixed = _content.GetDoubleParameter("Total O&M Cost,", -1.0, 0.0, 100.0);
             if (oamtotalfixed < 0)
             {
-                oamtotalfixedprovided = 0;
                 oamtotalfixedvalid = 0;
             }
             capCostParms.oamtotalfixed = oamtotalfixed;

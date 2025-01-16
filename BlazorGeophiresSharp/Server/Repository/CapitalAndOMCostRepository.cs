@@ -299,12 +299,10 @@ namespace BlazorGeophiresSharp.Server.Repository
             // O&M cost parameters
             // oamtotalfixed: total O&M cost in M$/year
             // user can provide total O&M cost (M$)
-            int oamtotalfixedprovided = 1;
             int oamtotalfixedvalid = 1;
             double oamtotalfixed = _content.GetDoubleParameter("Total O&M Cost,", -1.0, 0.0, 100.0);
             if (oamtotalfixed < 0)
             {
-                oamtotalfixedprovided = 0;
                 oamtotalfixedvalid = 0;
             }
             capCostParms.oamtotalfixed = oamtotalfixed;

@@ -144,7 +144,7 @@
         input.financialParms = financialParms;
         input.capitalParms = capitalParms;
         input.simParms = simParms;
-        string outputContent = await gm.Modeling(input);
+        string outputContent = gm.Modeling(input);
         var options = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
         var parameters = new DialogParameters { ["content"] = outputContent };
         var output = await DialogService.Show<ModelResults>("Model Results", parameters, options).Result;
