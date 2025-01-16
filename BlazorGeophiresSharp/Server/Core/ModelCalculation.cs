@@ -522,13 +522,11 @@ namespace BlazorGeophiresSharp.Server.Core
             }
             f1 = npf1;
             
-            string strpumpdepth = "";
             double[] DP = { 0.0 };
             double[] DP1 = { 0.0 };
             double[] DP2 = { 0.0 };
             double[] DP3 = { 0.0 };
             double[] DP4 = { 0.0 };
-            string strPumpingPowerInj = "";
             double Pprodwellhead = 0.0;
             if (sstParms.impedancemodelused == 1)
             {
@@ -708,7 +706,6 @@ namespace BlazorGeophiresSharp.Server.Core
 
         private void CalculateEnergyExtractedAndProduced()
         {
-            string strPumpingPower = "";
             double[] ReinjTemp = new double[] { 0 };
             double[] etau = new double[] { 0 };
             double[] HeatExtractedTowardsElectricity = new double[] { 0 };

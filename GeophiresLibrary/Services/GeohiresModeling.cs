@@ -784,7 +784,6 @@ namespace GeophiresLibrary.Services
 
         private void CalculateEnergyExtractedAndProduced()
         {
-            string strPumpingPower = "";
             double[] ReinjTemp = new double[] { 0 };
             double[] etau = new double[] { 0 };
             double[] HeatExtractedTowardsElectricity = new double[] { 0 };
@@ -1237,13 +1236,11 @@ namespace GeophiresLibrary.Services
             }
             f1 = npf1;
 
-            string strpumpdepth = "";
             double[] DP = { 0.0 };
             double[] DP1 = { 0.0 };
             double[] DP2 = { 0.0 };
             double[] DP3 = { 0.0 };
             double[] DP4 = { 0.0 };
-            string strPumpingPowerInj = "";
             double Pprodwellhead = 0.0;
             if (sstParms.impedancemodelused == 1)
             {
