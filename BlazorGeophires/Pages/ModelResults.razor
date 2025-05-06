@@ -1,4 +1,6 @@
-﻿<style>
+﻿@inject IJSRuntime JS
+
+<style>
     .report-container {
         max-height: 500px; /* Set the maximum height to your desired value */
         overflow-y: auto;
@@ -12,7 +14,8 @@
         </div>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@Ok">Close</MudButton>
+        <MudButton Color="Color.Primary" OnClick="@Print">Print</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="@Ok">Close</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -29,6 +32,11 @@
     }
 
     private string ReportText;
+
+    private async Task Print()
+    {
+        await JS.InvokeVoidAsync("printContent", content);
+    }
 
     private void Ok()
     {

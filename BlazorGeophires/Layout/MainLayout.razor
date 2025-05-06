@@ -5,6 +5,7 @@
 @inject IFinancialRepository financials
 @inject ICapitalAndOMCostRepository capital
 @inject IModeling gm
+@inject IJSRuntime JS
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -78,6 +79,22 @@
     private SurfaceTechnicalParameters surfaceParms { get; set; }
     private FinancialParameters financialParms { get; set; }
     private CapitalAndOMCostParameters capitalParms { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JS.InvokeVoidAsync("eval", @"
+            window.printContent = function (content) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write('<html><head><title>Print Report</title></head><body>');
+                printWindow.document.write('<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            };
+        ");
+    }
 
     private async Task UploadFile(IBrowserFile file)
     {
