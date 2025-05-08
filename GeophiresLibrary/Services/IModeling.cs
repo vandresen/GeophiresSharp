@@ -10,5 +10,6 @@ namespace GeophiresLibrary.Services
     public interface IModeling
     {
         string Modeling(InputParameters input);
+        string GetCalculatedJsonResult();
     }
 }

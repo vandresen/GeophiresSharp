@@ -27,7 +27,7 @@
             </div>
             <br />
             <div>
-                <MudTextField @bind-Value="FileSelection" Label="Selected Parameter File" ReadOnly="true" Variant="Variant.Outlined" />
+                <MudTextField T="string" @bind-Value="FileSelection" Label="Selected Parameter File" ReadOnly="true" Variant="Variant.Outlined" />
             </div>
             <br />
             <div>
@@ -147,29 +147,44 @@
         if (subsurfaceParms.resoption == 5 && TempDataFileSelection == "No file selected")
         {
             await DialogService.ShowMessageBox(
-                "Temprature Data Error",
-                "Please select a temprature data file.",
+                "Temperature Data Error",
+                "Please select a temperature data file.",
                 yesText: "OK"
             );
             return;
         }
-        InputParameters input = new InputParameters();
-        input.Content = content;
-        input.TempDataContent = tempDataContent;
-        input.surfaceParms = surfaceParms;
-        input.subsurfaceParms = subsurfaceParms;
-        input.financialParms = financialParms;
-        input.capitalParms = capitalParms;
-        input.simParms = simParms;
+
+        InputParameters input = new InputParameters
+            {
+                Content = content,
+                TempDataContent = tempDataContent,
+                surfaceParms = surfaceParms,
+                subsurfaceParms = subsurfaceParms,
+                financialParms = financialParms,
+                capitalParms = capitalParms,
+                simParms = simParms
+            };
+
         string outputContent = gm.Modeling(input);
         var options = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
         var parameters = new DialogParameters { ["content"] = outputContent };
-        var output = await DialogService.Show<ModelResults>("Model Results", parameters, options).Result;
 
-        if (!output.Canceled)
+        var dialog = await DialogService.ShowAsync<ModelResults>("Model Results", parameters, options);
+        var dialogResult = await dialog.Result;
+
+        if (!dialogResult.Canceled)
         {
-            closeResult = (bool)(output.Data ?? false);
+            if (dialogResult.Data is bool result)
+            {
+                closeResult = result;
+            }
+            else
+            {
+                Console.WriteLine("Dialog result is not of type bool");
+            }
         }
+
+        // Reset file selections and content after closing the dialog
         content = "No content";
         FileSelection = "No file selected";
     }

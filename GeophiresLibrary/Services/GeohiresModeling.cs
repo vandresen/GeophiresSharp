@@ -2,7 +2,7 @@
 using GeophiresLibrary.Extensions;
 using GeophiresLibrary.Models;
 using System.Numerics;
-using System.Security.Claims;
+using System.Text.Json;
 
 namespace GeophiresLibrary.Services
 {
@@ -82,6 +82,12 @@ namespace GeophiresLibrary.Services
             report.EnergyGenerationProfileReport(simulationParms, finParms, calcResult);
             string reportOutput = report.GetReport();
             return reportOutput;
+        }
+
+        public string GetCalculatedJsonResult()
+        {
+            string json = JsonSerializer.Serialize(calcResult);
+            return json;
         }
 
         public void CalculateModel(string tempDataContent)
