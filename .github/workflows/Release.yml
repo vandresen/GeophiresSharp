@@ -21,25 +21,3 @@ jobs:
 
       - name: Build
         run: dotnet build BlazorGeophires/BlazorGeophires.csproj --configuration Release --no-restore
-
-      #- name: Publish
-      #  run: dotnet publish BlazorGeophires/BlazorGeophires.csproj
-
-      - name: Publish
-        run: dotnet publish BlazorGeophires/BlazorGeophires.csproj -o ${{ github.workspace }}/publish -c Release --no-restore --no-build
-
-      - name: Upload Hosted Server Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: HostedServer
-          path: ${{ github.workspace }}/publish
-
-      #- name: Create zip File
-      # run: |
-      #    Compress-Archive -Path BlazorGeophires\bin\Release\net8.0\publish\* -DestinationPath app.zip -Force
-
-      #- name: Upload artifact
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: Release
-      #    path: app.zip
