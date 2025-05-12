@@ -21,3 +21,18 @@ jobs:
 
       - name: Build
         run: dotnet build BlazorGeophires/BlazorGeophires.csproj --configuration Release --no-restore
+
+      - name: Publish Blazor WebAssembly app
+        run: dotnet publish BlazorGeophires/BlazorGeophires.csproj -c Release -o publish
+
+      - name: Upload to Azure Blob Storage
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            az storage blob upload-batch \
+              --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+              --destination '$web' \
+              --source 'publish/wwwroot' \
+              --overwrite
+        env:
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
