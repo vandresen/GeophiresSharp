@@ -5,7 +5,7 @@ on:
   
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
 
       # Checkout the repo
@@ -22,15 +22,17 @@ jobs:
       - name: Build
         run: dotnet build BlazorGeophires/BlazorGeophires.csproj --configuration Release --no-restore
 
-      - name: Publish
-        run: dotnet publish BlazorGeophires/BlazorGeophires.csproj
+      - name: Publish Blazor WebAssembly app
+        run: dotnet publish BlazorGeophires/BlazorGeophires.csproj -c Release -o publish
 
-      - name: Create zip File
-        run: |
-          Compress-Archive -Path BlazorGeophires\bin\Release\net8.0\publish\* -DestinationPath app.zip -Force
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload to Azure Blob Storage
+        uses: azure/cli@v1
         with:
-          name: Release
-          path: app.zip
+          inlineScript: |
+            az storage blob upload-batch \
+              --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+              --destination '$web' \
+              --source 'publish/wwwroot' \
+              --overwrite
+        env:
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
