@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +16,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GeophiresLibrary\GeophiresLibrary.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+	<EmbeddedResource Include="Default\default-parameters.txt" />
   </ItemGroup>
 
 </Project>

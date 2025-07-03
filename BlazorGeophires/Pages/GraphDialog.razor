@@ -1,10 +1,19 @@
 ﻿@inject IModeling calResult
 @using System.Text.Json;
+@using GeophiresLibrary.Models
+@using GeophiresLibrary.Services
+@using MudBlazor;
 
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.h6" Class="mb-2">Line Chart</MudText>
         <MudPaper Class="doc-section-component-container">
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Filled">
+                <MudButton OnClick='@(() => OnSeriesChanged(SeriesType.Electricity))'>Electricity</MudButton>
+                <MudButton OnClick='@(() => OnSeriesChanged(SeriesType.Heat))'>Heat</MudButton>
+                <MudButton OnClick='@(() => OnSeriesChanged(SeriesType.Reservoir))'>Reservoir Heat Content</MudButton>
+                <MudButton OnClick='@(() => OnSeriesChanged(SeriesType.Percentage))'>% Heat Mined</MudButton>
+            </MudButtonGroup>
             <MudChart ChartType="ChartType.Line" ChartOptions="ChartOptions" ChartSeries="@_series" XAxisLabels="@_labels" Width="@_width" Height="@_height" />
         </MudPaper>
     </DialogContent>
@@ -25,6 +34,16 @@
     private string[] _labels = Array.Empty<string>();
     private List<ChartSeries> _series = new();
 
+    private enum SeriesType
+    {
+        Electricity,
+        Heat,
+        Reservoir,
+        Percentage
+    }
+    private SeriesType _selectedSeries = SeriesType.Electricity;
+    private CalculatedResults _results;
+
     public ChartOptions ChartOptions = new ChartOptions
         {
             LineStrokeWidth = 2
@@ -38,33 +57,72 @@
     private void LoadChartData()
     {
         string json = calResult.GetCalculatedJsonResult();
-        var result = JsonSerializer.Deserialize<CalculatedResults>(json);
+        _results = JsonSerializer.Deserialize<CalculatedResults>(json);
 
-        if (result?.NetElectricityProduced != null)
+        UpdateSeries();
+    }
+
+    private void UpdateSeries()
+    {
+        if (_results == null) return;
+
+        var (data, name) = GetSelectedSeriesData();
+        int totalPoints = data.Length;
+
+        _labels = GenerateYearLabels(totalPoints, 10);
+
+        _series = new List<ChartSeries>
         {
-            int totalPoints = result.NetkWhProduced.Length;
-            int numLabels = 10;
+            new ChartSeries { Name = name, Data = data }
+        };
 
-            // Compute interval to pick 10 evenly spaced labels
-            double step = (double)(totalPoints - 1) / (numLabels - 1);
-            HashSet<int> labelPositions = Enumerable.Range(0, numLabels)
-                .Select(i => (int)Math.Round(i * step))
-                .ToHashSet();
+        StateHasChanged();
+    }
 
-            _labels = Enumerable.Range(1, totalPoints)
-                .Select((val, idx) => labelPositions.Contains(idx) ? $"Year {val}" : "")
-                .ToArray();
+    private (double[] Data, string Name) GetSelectedSeriesData()
+    {
+        switch (_selectedSeries)
+        {
+            case SeriesType.Electricity:
+                return (_results.NetkWhProduced.Select(x => x / 1e6).ToArray(), "Net Electricity Produced (GWh)");
 
-            // Create the chart series
-            _series = new List<ChartSeries>
-            {
-                new ChartSeries
-                {
-                    Name = "Net Electricity Produced (GWh)",
-                    Data = result.NetkWhProduced.Select(x => x / 1e6).ToArray()
-                }
-            };
+            case SeriesType.Heat:
+                return (_results.HeatkWhExtracted.Select(x => x / 1e6).ToArray(), "Heat Extracted (GWh)");
+
+            case SeriesType.Reservoir:
+                return (_results.RemainingReservoirHeatContent, "Reservoir Heat Content (10^15 J)");
+
+            case SeriesType.Percentage:
+                double initial = _results.InitialReservoirHeatContent;
+                double[] percentData = (initial == 0)
+                    ? new double[_results.RemainingReservoirHeatContent.Length]
+                    : _results.RemainingReservoirHeatContent
+                        .Select(r => (initial - r) * 100.0 / initial)
+                        .ToArray();
+                return (percentData, "Percentage of Total Heat Mined (%)");
+
+            default:
+                return (Array.Empty<double>(), "");
         }
+    }
+
+
+    private string[] GenerateYearLabels(int totalPoints, int numLabels)
+    {
+        double step = (double)(totalPoints - 1) / (numLabels - 1);
+        HashSet<int> labelPositions = Enumerable.Range(0, numLabels)
+            .Select(i => (int)Math.Round(i * step))
+            .ToHashSet();
+
+        return Enumerable.Range(1, totalPoints)
+            .Select((val, idx) => labelPositions.Contains(idx) ? $"Year {val}" : "")
+            .ToArray();
+    }
+
+    private void OnSeriesChanged(SeriesType value)
+    {
+        _selectedSeries = value;
+        UpdateSeries();
     }
 
     void Close() => MudDialog.Close(DialogResult.Ok(true));
