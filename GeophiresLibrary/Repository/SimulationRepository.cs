@@ -46,10 +46,14 @@ namespace GeophiresLibrary.Repository
             //pptype = 2: Supercritical ORC
             //pptype = 3: Single-Flash
             //pptype = 4: Double-Flash
+            simulationParms.pptype = null;
             List<int> valid_pptype = new List<int>() { 1, 2, 3, 4 };
-            int pptype = _content.GetIntParameter("Power Plant Type,", 1, valid_pptype);
-            simulationParms.pptype = pptype;
-
+            if (valid_enduseoption.Contains(enduseoption))
+            {
+                int pptype = _content.GetIntParameter("Power Plant Type,", 1, valid_pptype);
+                simulationParms.pptype = pptype;
+            }
+            
             return simulationParms;
         }
     }

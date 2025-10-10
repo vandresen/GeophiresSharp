@@ -147,25 +147,28 @@
 
     private async Task OpenDialog()
     {
+        Console.WriteLine($"Simulation Parameters received: End use option ={simParms.enduseoption}");
         if (DialogService == null)
         {
             Console.WriteLine("DialogService is null");
             return;
         }
-        if (FileSelection == "No file selected")
-        {
-            await DialogService.ShowMessageBox(
-                "File Selection Error",
-                "Please select a parameter file.",
-                yesText: "OK"
-            );
-            return;
-        }
+        
         if (subsurfaceParms.resoption == 5 && TempDataFileSelection == "No file selected")
         {
             await DialogService.ShowMessageBox(
                 "Temperature Data Error",
                 "Please select a temperature data file.",
+                yesText: "OK"
+            );
+            return;
+        }
+
+        if (subsurfaceParms.resoption == 6)
+        {
+            await DialogService.ShowMessageBox(
+                "Option for TOUGH2 modeling is not available",
+                "Please select a different parameter.",
                 yesText: "OK"
             );
             return;
@@ -202,7 +205,7 @@
         }
 
         // Reset file selections and content after closing the dialog
-        content = "No content";
-        FileSelection = "No file selected";
+        // content = "No content";
+        // FileSelection = "No file selected";
     }
 }

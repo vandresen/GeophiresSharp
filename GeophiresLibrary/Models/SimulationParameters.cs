@@ -85,6 +85,6 @@ namespace GeophiresLibrary.Models
         //   4: Double-flash
         //When required: If the end-use option is 1, 31, 32, 41, 42, 51, or 52
         //Default value: 1
-        public int pptype { get; set; }
+        public int? pptype { get; set; }
     }
 }

@@ -303,7 +303,7 @@ namespace GeophiresLibrary.Repository
             if (simulationParms.enduseoption == 1)
             {
                 //simple single- or double-flash power plant assumes no production well pumping
-                if (new[] { 3, 4 }.Contains(simulationParms.pptype))
+                if (new[] { 3, 4 }.Contains((int)simulationParms.pptype))
                 {
                     impedancemodelallowed = 0;
                     productionwellpumping = 0;
@@ -312,7 +312,7 @@ namespace GeophiresLibrary.Repository
             }
             else if (new[] { 31, 32 }.Contains(simulationParms.enduseoption))
             {
-                if (new[] { 3, 4 }.Contains(simulationParms.pptype))
+                if (new[] { 3, 4 }.Contains((int)simulationParms.pptype))
                 {
                     impedancemodelallowed = 0;
                     productionwellpumping = 0;
@@ -321,7 +321,7 @@ namespace GeophiresLibrary.Repository
             }
             else if (new[] { 41, 42 }.Contains(simulationParms.enduseoption))
             {
-                if (new[] { 3, 4 }.Contains(simulationParms.pptype))
+                if (new[] { 3, 4 }.Contains((int)simulationParms.pptype))
                 {
                     impedancemodelallowed = 0;
                     setinjectionpressurefixed = 1;
@@ -329,7 +329,7 @@ namespace GeophiresLibrary.Repository
             }
             else if (new[] { 51, 52 }.Contains(simulationParms.enduseoption))
             {
-                if (new[] { 3, 4 }.Contains(simulationParms.pptype))
+                if (new[] { 3, 4 }.Contains((int)simulationParms.pptype))
                 {
                     impedancemodelallowed = 0;
                     setinjectionpressurefixed = 1;
