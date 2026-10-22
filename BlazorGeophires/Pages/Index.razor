@@ -46,7 +46,7 @@
                         <Financial Parms="financialParms"/>
                     </MudTabPanel>
                     <MudTabPanel Text="Capital and O&M Cost Parameters">
-                        <CapitalCost Parms="capitalParms"/>
+                        <CapitalCost Parms="capitalParms" SubSurfaceParms="subsurfaceParms" SimParms="simParms"/>
                     </MudTabPanel>
                 </MudTabs>
             }
@@ -148,6 +148,7 @@
     private async Task OpenDialog()
     {
         Console.WriteLine($"Simulation Parameters received: End use option ={simParms.enduseoption}");
+        Console.WriteLine($"Drilling cost ={capitalParms.ccwellfixed}");
         if (DialogService == null)
         {
             Console.WriteLine("DialogService is null");

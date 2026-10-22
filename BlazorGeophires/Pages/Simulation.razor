@@ -38,10 +38,26 @@
     }
 </MudSelect>
 
+<MudNumericField T="double"
+                 @bind-Value="Parms.projectlatitude"
+                 Label="Project Latitude"
+                 HelperText="Latitude of the project location (-90 to 90)"
+                 Variant="Variant.Outlined"
+                 Min="-90.0"
+                 Max="90.0"
+                 Immediate="true" />
+
+<MudNumericField T="double"
+                 @bind-Value="Parms.projectlongitude"
+                 Label="Project Longitude"
+                 HelperText="Longitude of the project location (-180 to 180)"
+                 Variant="Variant.Outlined"
+                 Min="-180.0"
+                 Max="180.0"
+                 Immediate="true" />
+
 @code {
     [Parameter] public SimulationParameters Parms { get; set; }
-    public int timestepsperyear { get; set; }
-    private string endUseOption;
     private readonly string[] PowerPlantTypes =
     {
         "Subcritical ORC",

@@ -3,6 +3,7 @@ using GeophiresLibrary.Extensions;
 using GeophiresLibrary.Models;
 using System.Numerics;
 using System.Text.Json;
+using static GeophiresLibrary.Core.Utilities;
 
 namespace GeophiresLibrary.Services
 {
@@ -65,6 +66,7 @@ namespace GeophiresLibrary.Services
             stParms = input.surfaceParms;
             finParms = input.financialParms;
             ccParms = input.capitalParms;
+            Console.WriteLine($"Drilling cost in modeling ={ccParms.ccwellfixed}");
         }
 
         public string CreateReport()
@@ -457,26 +459,15 @@ namespace GeophiresLibrary.Services
             }
             else
             {
-                if (ccParms.wellcorrelation == 1) //vertical open-hole, small diameter
-                {
-                    C1well = (0.3021 * Math.Pow(sstParms.depth, 2) + 584.9112 * sstParms.depth + 751368.0) * 1E-6; //well drilling and completion cost in M$/well
-                }
-                else if (ccParms.wellcorrelation == 2) //deviated liner, small diameter
-                {
-                    C1well = (0.2898 * Math.Pow(sstParms.depth, 2) + 822.1507 * sstParms.depth + 680563.0) * 1E-6;
-                }
-                else if (ccParms.wellcorrelation == 3) //vertical open-hole, large diameter
-                {
-                    C1well = (0.2818 * Math.Pow(sstParms.depth, 2) + 1275.5213 * sstParms.depth + 632315.0) * 1E-6;
-                }
-                else if (ccParms.wellcorrelation == 4) //deviated liner, large diameter
-                {
-                    C1well = (0.2553 * Math.Pow(sstParms.depth, 2) + 1716.7157 * sstParms.depth + 500867.0) * 1E-6;
-                }
-                if (sstParms.depth < 500) Console.WriteLine("Warning: drilling cost correlation extrapolated for drilling depth < 500 m");
-                if (sstParms.depth > 7000) Console.WriteLine("Warning: drilling cost correlation extrapolated for drilling depth > 7000 m");
-                C1well = ccParms.ccwelladjfactor * C1well;
-                Cwell = 1.05 * C1well * (sstParms.nprod + sstParms.ninj); //1.05 for 5% indirect costs
+                // Cost per well in M$, including the adjustment factor.
+                // Warns for depth > 7000 m and falls back to per-meter cost for depth < 500 m.
+                C1well = WellCostCalculator.CostOfOneWell(
+                    sstParms.depth,                // meters
+                    ccParms.wellcorrelation,
+                    ccParms.verticaldrillingcostperm,
+                    ccParms.ccwelladjfactor);
+
+                Cwell = (1.0 + ccParms.wellindirectpercent / 100.0) * C1well * (sstParms.nprod + sstParms.ninj);
             }
             calcResult.Cwell = Cwell;
 

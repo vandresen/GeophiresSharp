@@ -76,5 +76,6 @@ namespace GeophiresLibrary.Models
         //When required: If the end-use option is 1, 31, 32, 41, 42, 51, or 52
         //Default value: 15°C
         public double Tenv { get; set; }
+
     }
 }

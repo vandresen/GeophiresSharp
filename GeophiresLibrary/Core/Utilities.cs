@@ -149,5 +149,68 @@ namespace GeophiresLibrary.Core
 
             return integral;
         }
+
+        public static class WellCostCalculator
+        {
+            private const double MinValidDepthM = 500.0;
+            private const double MaxValidDepthM = 7000.0;
+            private const int SimpleCorrelation = 5;
+
+            // GEOPHIRES-X correlations: cost (M$) = (c2*d^2 + c1*d + c0) * 1E-6, d in meters
+            private static readonly Dictionary<int, (double c2, double c1, double c0)> Correlations = new()
+            {
+                // 2025 NREL cost curve update
+                [1] = (0.258496, 357.967, 738531.58),   // vertical small, baseline
+                [2] = (0.240624, 646.1621, 503625.06),   // deviated small, baseline
+                [3] = (0.248458, 935.8985, 626586.68),   // vertical large, baseline
+                [4] = (0.217333, 1362.93, 301066.16),   // deviated large, baseline
+                                                        // GeoVision variants
+                [6] = (0.13710, 129.61033, 1205587.57100),
+                [7] = (0.00804, 455.60507, 921007.68680),
+                [8] = (0.15340, 120.31700, 1431801.54400),
+                [9] = (0.00854, 506.08357, 1057330.39000),
+                [10] = (0.18927, 293.45174, 1326526.31300),
+                [11] = (0.00315, 782.69676, 983620.25270),
+                [12] = (0.19950, 296.13011, 1697867.70900),
+                [13] = (0.00380, 838.90249, 1181947.04400),
+                [14] = (0.00252, 439.44503, 590611.90110),
+                [15] = (0.00719, 455.85233, 753377.73080),
+                [16] = (-0.00240, 752.93946, 524337.65380),
+                [17] = (0.00376, 762.52696, 765103.07690),
+            };
+
+            /// <summary>Cost of one vertical well in M$, including the adjustment factor.</summary>
+            public static double CostOfOneWell(double depthM, int correlation,
+                                               double perMeterCost, double adjustmentFactor)
+            {
+                if (depthM < MinValidDepthM && correlation != SimpleCorrelation)
+                {
+                    Console.WriteLine($"Warning: correlation {correlation} invalid for depth < {MinValidDepthM} m " +
+                                      $"({depthM} m). Falling back to per-meter cost ({perMeterCost} $/m).");
+                    correlation = SimpleCorrelation;
+                }
+                if (depthM > MaxValidDepthM && correlation != SimpleCorrelation)
+                {
+                    Console.WriteLine($"Warning: correlation {correlation} may be invalid for depth > {MaxValidDepthM} m ({depthM} m).");
+                }
+
+                double cost;
+                if (correlation == SimpleCorrelation)
+                {
+                    cost = perMeterCost * depthM * 1E-6;
+                }
+                else if (Correlations.TryGetValue(correlation, out var c))
+                {
+                    cost = (c.c2 * depthM * depthM + c.c1 * depthM + c.c0) * 1E-6;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(correlation), correlation,
+                        "Unknown well drilling cost correlation (valid: 1-17).");
+                }
+
+                return adjustmentFactor * cost;
+            }
+        }
     }
 }

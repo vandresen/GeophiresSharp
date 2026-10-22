@@ -22,7 +22,6 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] IDialogReference DialogReference { get; set; }
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; }
 
@@ -32,10 +31,7 @@
     {
         await base.OnInitializedAsync();
         Console.WriteLine(content);
-        ReportText = content;
     }
-
-    private string ReportText;
 
     private async Task Print()
     {
@@ -62,6 +58,6 @@
             };
 
 
-        DialogService.Show<GraphDialog>("Graph Output", parameters, options);
+        await DialogService.ShowAsync<GraphDialog>("Graph Output", parameters, options);
     }
 }

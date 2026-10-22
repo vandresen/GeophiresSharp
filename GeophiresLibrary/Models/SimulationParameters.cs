@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GeophiresLibrary.Models
+﻿namespace GeophiresLibrary.Models
 {
     public class SimulationParameters
     {
@@ -86,5 +80,23 @@ namespace GeophiresLibrary.Models
         //When required: If the end-use option is 1, 31, 32, 41, 42, 51, or 52
         //Default value: 1
         public int? pptype { get; set; }
+
+        //Parameter name: Project Latitude
+        //Description: Latitude of the project location.
+        //Parameter type: Number
+        //Units: 1 (dimensionless)
+        //Range of allowable values: [-90,90]
+        //When required: Optional (default is used if not provided)
+        //Default value: 0.0
+        public double projectlatitude { get; set; } = 0.0;
+
+        //Parameter name: Project Longitude
+        //Description: Longitude of the project location.
+        //Parameter type: Number
+        //Units: 1 (dimensionless)
+        //Range of allowable values: [-180,180]
+        //When required: Optional (default is used if not provided)
+        //Default value: 0.0
+        public double projectlongitude { get; set; } = 0.0;
     }
 }

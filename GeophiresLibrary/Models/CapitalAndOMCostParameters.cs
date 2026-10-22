@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GeophiresLibrary.Models
+﻿namespace GeophiresLibrary.Models
 {
     public class CapitalAndOMCostParameters
     {
@@ -41,14 +35,27 @@ namespace GeophiresLibrary.Models
         //Parameter type: Integer
         //Units: N/A
         //Allowable value range:
-        //  1: vertical open-hole, small diameter
-        //  2: deviated liner, small diameter
-        //  3: vertical open-hole, large diameter
-        //  4: deviated liner, large diameter
-        //When required: If no valid fixed well drilling and completion capital cost is
-        //               provided
-        //Default value: 1
-        public int wellcorrelation { get; set; }
+        //  1: vertical small diameter, baseline
+        //  2: deviated small diameter, baseline
+        //  3: vertical large diameter, baseline
+        //  4: deviated large diameter, baseline
+        //  5: Simple (per-meter cost)
+        //  6: vertical small diameter, intermediate1
+        //  7: vertical small diameter, intermediate2
+        //  8: deviated small diameter, intermediate1
+        //  9: deviated small diameter, intermediate2
+        //  10: vertical large diameter, intermediate1
+        //  11: vertical large diameter, intermediate2
+        //  12: deviated large diameter, intermediate1
+        //  13: deviated large diameter, intermediate2
+        //  14: vertical open-hole, small diameter, ideal
+        //  15: deviated liner, small diameter, ideal
+        //  16: vertical open-hole, large diameter, ideal
+        //  17: deviated liner, large diameter, ideal
+        //  (1-4: 2025 NREL cost curves; 6-17: GeoVision; 5 uses the all-in vertical drilling cost per meter)
+        //When required: If no valid fixed well drilling and completion capital cost is provided
+        //Default value: 10 (GEOPHIRES-X default; use 1 to keep the previous default)
+        public int wellcorrelation { get; set; } = 1;
 
         //Parameter name: Reservoir Stimulation Capital Cost
         //Description: Total reservoir stimulation capital cost
@@ -211,6 +218,13 @@ namespace GeophiresLibrary.Models
         //   o When required: In case end-use option = 31, 41, or 51
         //   o Default value: 0.02
         public double heatprice { get; set; }
+
+        // All-in vertical drilling cost. Units: $/m. Range: [0,10000]. Default: 1000
+        public double verticaldrillingcostperm { get; set; } = 1000.0;
+
+        // Indirect capital cost for well drilling and completion, as a percentage of direct cost.
+        // Units: %. Range: [0,100]. Default: 5
+        public double wellindirectpercent { get; set; } = 5.0;
 
         //Additional parameters
         public int ccwellfixedvalid { get; set; }

@@ -1,0 +1,25 @@
+﻿<MudNumericField T="double?"
+                 Value="DisplayValue"
+                 ValueChanged="OnValueChanged"
+                 Label="@Label"
+                 ReadOnly="ReadOnly"
+                 Min="Min" Max="Max"
+                 Placeholder="Calculated"
+                 Variant="Variant.Outlined" />
+
+@code {
+    [Parameter] public double Value { get; set; }
+    [Parameter] public EventCallback<double> ValueChanged { get; set; }
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public bool ReadOnly { get; set; } = true;
+    [Parameter] public double? Min { get; set; }
+    [Parameter] public double? Max { get; set; }
+
+    // Value written back when the field is cleared = "calculate it"
+    private const double CalculatedValue = -1;
+
+    private double? DisplayValue => Value < 0 ? null : Value;
+
+    private Task OnValueChanged(double? v) =>
+        ValueChanged.InvokeAsync(v ?? CalculatedValue);
+}

@@ -1,0 +1,379 @@
+﻿@using MudBlazor
+@inject IDrillingCostResearchService DrillingCostResearchService
+@inject AiSettings AiSettings
+@inject IDialogService DialogService
+@using static GeophiresLibrary.Models.DrillingCostModels
+@implements IDisposable
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="3">
+
+            <MudText Typo="Typo.h5">
+                <MudIcon Icon="@Icons.Material.Filled.AutoAwesome"
+                         Color="Color.Primary"
+                         Class="mr-2" />
+                Drilling Cost Assistant
+            </MudText>
+
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Estimate the fixed drilling and completion cost per well
+                from your project configuration.
+            </MudText>
+
+            <MudText Typo="Typo.h6">Project context</MudText>
+
+            <MudTextField T="string"
+                          Label="Project location"
+                          @bind-Value="_location"
+                          Placeholder="e.g. Nevada, USA"
+                          HelperText="@(HasCoords || !string.IsNullOrWhiteSpace(_location) ? "Enter a state or region to improve geographic relevance." : "No location or coordinates set. The estimate will be generic.")"
+                          Variant="Variant.Outlined" />
+
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                        Label="Project coordinates"
+                        Value="@(HasCoords ? $"{Latitude:N4}, {Longitude:N4}" : "Not set")"
+                        ReadOnly="true"
+                        Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="Reservoir / well depth"
+                                  Value="@Format(Subsurface?.depth, "m")"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="Production / injection wells"
+                                  Value="@(Subsurface is null ? "Not available" : $"{Subsurface.nprod} / {Subsurface.ninj}")"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="Production borehole diameter"
+                                  Value="@Format(Subsurface?.prodwelldiam, "m")"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="Injection borehole diameter"
+                                  Value="@Format(Subsurface?.injwelldiam, "m")"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="Well cost correlation"
+                                  Value="@WellCorrelationDescription"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="Drilling cost adjustment factor"
+                                  Value="@Parms.ccwelladjfactor.ToString("N3")"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="Well indirect capital cost"
+                                  Value="@($"{Parms.wellindirectpercent:N2}%")"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string"
+                                  Label="End-use option"
+                                  Value="@EndUseOptionDescription"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+            </MudGrid>
+
+            <MudAlert Severity="Severity.Info"
+                      Variant="Variant.Outlined">
+                Current drilling cost:
+                <b>@FormatCost(CurrentCost)</b>
+
+                <br />
+
+                The recommendation will be for cost per well,
+                not the total cost of all wells.
+            </MudAlert>
+
+            @if (string.IsNullOrWhiteSpace(AiSettings.OpenAIApiKey))
+            {
+                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+                    An OpenAI API key is needed.
+                    <MudLink OnClick="SetKeyAsync">Set API key</MudLink>
+                </MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.AutoAwesome"
+                       Disabled="@(_researching || string.IsNullOrWhiteSpace(AiSettings.OpenAIApiKey))"
+                       OnClick="ResearchAsync"
+                       FullWidth="true">
+                @(_researching ? "Researching..." : "Research with AI")
+            </MudButton>
+
+            @if (_researchResult is not null)
+            {
+                <MudDivider />
+
+                <MudText Typo="Typo.h6">Recommendation</MudText>
+
+                <MudText Typo="Typo.h4" Color="Color.Primary">
+                    @FormatCost(_researchResult.CostPerWellMUSD)
+                    M$/well
+                </MudText>
+
+                <MudText Typo="Typo.body2">
+                    Estimated range:
+                    @FormatCost(_researchResult.LowMUSD)
+                    –
+                    @FormatCost(_researchResult.HighMUSD)
+                    M$/well
+                </MudText>
+
+                @if (_researchResult.DollarYear.HasValue)
+                {
+                    <MudText Typo="Typo.body2">
+                        Cost basis: @_researchResult.DollarYear USD
+                    </MudText>
+                }
+
+                <MudText Typo="Typo.body1">
+                    @_researchResult.Rationale
+                </MudText>
+
+                @if (_researchResult.Sources is { Count: > 0 })
+                {
+                    <MudText Typo="Typo.h6">References</MudText>
+
+                    @foreach (var source in _researchResult.Sources)
+                    {
+                        <MudStack Spacing="1" Class="mb-2">
+                            <MudText Typo="Typo.body2">
+                                @source.Title
+                                <span style="opacity:.7">(unverified, from model knowledge)</span>
+                            </MudText>
+                            <MudText Typo="Typo.caption">@source.Note</MudText>
+                        </MudStack>
+                    }
+                }
+
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.Check"
+                           Disabled="_researching"
+                           OnClick="UseSuggestion">
+                    Use suggestion
+                </MudButton>
+            }
+
+            @if (_researchMessage is not null)
+            {
+                <MudAlert Severity="@_messageSeverity" Variant="Variant.Outlined">
+                    @_researchMessage
+                </MudAlert>
+            }
+
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public CapitalAndOMCostParameters Parms { get; set; } = default!;
+
+    [Parameter]
+    public SubsurfaceTechnicalParameters? Subsurface { get; set; }
+
+    [Parameter]
+    public int EndUseOption { get; set; } = 1;
+
+    [Parameter]
+    public double CurrentCost { get; set; } = -1;
+
+    [Parameter] 
+    public double Latitude { get; set; }
+
+    [Parameter] 
+    public double Longitude { get; set; }
+
+    private static readonly (int Value, string Label)[] WellCorrelations =
+    {
+        (1,  "Vertical small diameter, baseline"),
+        (2,  "Deviated small diameter, baseline"),
+        (3,  "Vertical large diameter, baseline"),
+        (4,  "Deviated large diameter, baseline"),
+        (5,  "Simple (per-meter cost)"),
+        (6,  "Vertical small diameter, intermediate 1"),
+        (7,  "Vertical small diameter, intermediate 2"),
+        (8,  "Deviated small diameter, intermediate 1"),
+        (9,  "Deviated small diameter, intermediate 2"),
+        (10, "Vertical large diameter, intermediate 1"),
+        (11, "Vertical large diameter, intermediate 2"),
+        (12, "Deviated large diameter, intermediate 1"),
+        (13, "Deviated large diameter, intermediate 2"),
+        (14, "Vertical open-hole, small diameter, ideal"),
+        (15, "Deviated liner, small diameter, ideal"),
+        (16, "Vertical open-hole, large diameter, ideal"),
+        (17, "Deviated liner, large diameter, ideal")
+    };
+
+    private string? _location;
+    private bool _researching;
+    private string? _researchMessage;
+    private Severity _messageSeverity = Severity.Info;
+    private DrillingCostRecommendation? _researchResult;
+    private CancellationTokenSource? _cts;
+
+    private bool HasCoords => HasCoordinates(Latitude, Longitude);
+
+    private string WellCorrelationDescription =>
+        WellCorrelations.FirstOrDefault(
+            c => c.Value == Parms.wellcorrelation).Label
+        ?? $"Correlation {Parms.wellcorrelation}";
+
+    private string EndUseOptionDescription => EndUseOption switch
+    {
+        1 => "Electricity",
+        2 => "Direct-use heat",
+        31 => "CHP topping — electricity primary",
+        32 => "CHP topping — heat primary",
+        41 => "CHP bottoming — electricity primary",
+        42 => "CHP bottoming — heat primary",
+        51 => "CHP parallel — electricity primary",
+        52 => "CHP parallel — heat primary",
+        _ => $"Option {EndUseOption}"
+    };
+
+    private static string Format(double? value, string units) =>
+        value.HasValue
+            ? $"{value.Value:N2} {units}"
+            : "Not available";
+
+    private string FormatCost(double value) =>
+        value < 0 ? "Calculated by GEOPHIRES" : value.ToString("N2");
+
+    private static bool HasCoordinates(double lat, double lon) =>
+    double.IsFinite(lat) && double.IsFinite(lon)
+    && Math.Abs(lat) <= 90 && Math.Abs(lon) <= 180
+    && (lat != 0 || lon != 0);
+
+    private DrillingCostResearchRequest BuildRequest()
+    {
+        return new DrillingCostResearchRequest(
+            Location: _location,
+            Latitude: HasCoords ? Latitude : null,
+            Longitude: HasCoords ? Longitude : null,
+            DepthMeters: Subsurface?.depth,
+            ProductionWells: Subsurface?.nprod ?? 0,
+            InjectionWells: Subsurface?.ninj ?? 0,
+            ProductionDiameterMeters: Subsurface?.prodwelldiam,
+            InjectionDiameterMeters: Subsurface?.injwelldiam,
+            WellCorrelation: WellCorrelationDescription,
+            EndUse: EndUseOptionDescription);
+    }
+
+    private async Task ResearchAsync()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+
+        _researching = true;
+        _researchMessage = null;
+        _researchResult = null;
+
+        try
+        {
+            _researchResult = await DrillingCostResearchService.ResearchAsync(
+                BuildRequest(), _cts.Token);
+            _messageSeverity = Severity.Info;
+        }
+        catch (OperationCanceledException)
+        {
+            _researchMessage = "Research was cancelled.";
+            _messageSeverity = Severity.Info;
+        }
+        catch (Exception ex)
+        {
+            _researchMessage = $"Research failed: {ex.Message}";
+            _messageSeverity = Severity.Error;
+        }
+        finally
+        {
+            _researching = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        _cts?.Cancel();
+        MudDialog.Cancel();
+    }
+
+    private void UseSuggestion()
+    {
+        if (_researchResult is not { } result)
+            return;
+
+        var cost = result.CostPerWellMUSD;
+
+        if (!double.IsFinite(cost) ||
+            cost <= 0 ||
+            cost > 200 ||
+            !double.IsFinite(result.LowMUSD) ||
+            !double.IsFinite(result.HighMUSD) ||
+            result.LowMUSD < 0 ||
+            result.HighMUSD < result.LowMUSD ||
+            cost < result.LowMUSD ||
+            cost > result.HighMUSD)
+        {
+            _researchMessage =
+                "The recommendation or its cost range is invalid.";
+            _messageSeverity = Severity.Error;
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(cost));
+    }
+
+    private async Task SetKeyAsync()
+    {
+        var dlg = await DialogService.ShowAsync<AiKeyDialog>("OpenAI API key");
+        await dlg.Result;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+}

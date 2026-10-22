@@ -1,0 +1,43 @@
+﻿@using MudBlazor
+@inject AiSettings Settings
+@inject IJSRuntime JS
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField T="string"
+                      Label="OpenAI API key"
+                      @bind-Value="_key"
+                      InputType="InputType.Password"
+                      Immediate="true"
+                      Variant="Variant.Outlined" />
+        <MudText Typo="Typo.caption">Stored only in this browser.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="ClearAsync">Remove key</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="SaveAsync">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    private string? _key;
+
+    private async Task SaveAsync()
+    {
+        var k = (_key ?? "").Trim();
+        if (k.Length == 0) return;
+        await JS.InvokeVoidAsync("localStorage.setItem", AiSettings.StorageKey, k);
+        Settings.OpenAIApiKey = k;
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private async Task ClearAsync()
+    {
+        await JS.InvokeVoidAsync("localStorage.removeItem", AiSettings.StorageKey);
+        Settings.OpenAIApiKey = "";
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

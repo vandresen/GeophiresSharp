@@ -26,6 +26,7 @@ namespace GeophiresLibrary.Services
         public void CapitalCostReport(CapitalAndOMCostParameters ccParms, SubsurfaceTechnicalParameters sstParms,
             FinancialParameters finParms, CalculatedResults calcResult, SimulationParameters simParms)
         {
+            Console.WriteLine($"Drilling cost in report ={ccParms.ccwellfixed}");
             HeaderOutput("***CAPITAL COSTS (M$)***");
             if (ccParms.totalcapcostvalid == 0)
             {

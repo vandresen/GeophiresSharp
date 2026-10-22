@@ -1,84 +1,157 @@
-﻿<MudTextField @bind-Value="totalCapitalCost" Label="Total Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="wellDrillingCompletionCapitalCost" Label="Well Drilling and Completion Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="wellDrillingCompletionCapitalCostAdjustmentFactor" Label="Well Drilling and Completion Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="wellDrillingCostCorrelation" Label="Well Drilling Cost Correlation" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="reservoirStimulationCapitalCost" Label="Reservoir Stimulation Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="reservoirStimulationCapitalCostAdjustmentFactor" Label="Reservoir Stimulation Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="surfacePlantCapitalCost" Label="Surface Plant Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value=" surfacePlantCapitalCostAdjustmentFactor" Label="Surface Plant Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="fieldGatheringSystemCapitalCost" Label="Field Gathering System Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="fieldGatheringSystemCapitalCostAdjustmentFactor" Label="Field Gathering System Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="explorationCapitalCost" Label="Exploration Capital Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="explorationCapitalCostAdjustmentFactor" Label="Exploration Capital Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="totalOMCost" Label="Total O and M Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="wellfieldOMCost" Label="Wellfield O and M Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="wellfieldOMCostAdjustmentFactor" Label="Wellfield O and M Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="surfacePlantOMCost" Label="Surface Plant O and M Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="surfacePlantOMCostAdjustmentFactor" Label="Surface Plant O and M Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="waterCost" Label="Water Cost" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="waterCostAdjustmentFactor" Label="Water Cost Adjustment Factor" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="electricityRate" Label="Electricity Rate" ReadOnly="true" Variant="Variant.Outlined" />
-<MudTextField @bind-Value="heatRate" Label="Heat Rate" ReadOnly="true" Variant="Variant.Outlined" />
+﻿@inject IDialogService DialogService
 
-@code {
+@* Capital costs *@
+<SentinelNumericField @bind-Value="Parms.TotalCapitalCost"
+                      Label="Total Capital Cost" />
+
+<MudStack Row="true"
+          AlignItems="AlignItems.Center"
+          Spacing="1">
+    <SentinelNumericField @bind-Value="Parms.ccwellfixed"
+                          Label="Well Drilling and Completion Capital Cost"
+                          ReadOnly="false" />
+
+    <MudTooltip Text="Research this cost with AI">
+        <MudIconButton Icon="@Icons.Material.Filled.AutoAwesome"
+                       Color="Color.Primary"
+                       Variant="Variant.Outlined"
+                       Style="margin-top:8px; height:56px; width:56px;"
+                       OnClick="OpenDrillingCostAssistantAsync" />
+    </MudTooltip>
+</MudStack>
+<MudNumericField T="double" @bind-Value="Parms.ccwelladjfactor"
+                 Label="Well Drilling and Completion Capital Cost Adjustment Factor"
+                 Variant="Variant.Outlined" />
+<MudSelect T="int" @bind-Value="Parms.wellcorrelation"
+           Label="Well Drilling Cost Correlation"
+           Variant="Variant.Outlined">
+           @foreach (var c in WellCorrelations)
+           {
+               <MudSelectItem T="int" Value="@c.Value">@c.Value: @c.Label</MudSelectItem>
+           }
+</MudSelect>
+<MudNumericField T="double" @bind-Value="Parms.wellindirectpercent"
+                 Label="Well Indirect Capital Cost (%)"
+                 Variant="Variant.Outlined"
+                 Min="0" Max="100" />
+
+<SentinelNumericField @bind-Value="Parms.ccstimfixed"
+                      Label="Reservoir Stimulation Capital Cost" />
+<MudNumericField T="double" @bind-Value="Parms.ccstimadjfactor"
+                 Label="Reservoir Stimulation Capital Cost Adjustment Factor"
+                 ReadOnly="true"
+                 Variant="Variant.Outlined" />
+
+<SentinelNumericField @bind-Value="Parms.ccplantfixed"
+                      Label="Surface Plant Capital Cost" />
+<MudNumericField T="double" @bind-Value="Parms.ccplantadjfactor"
+                 Label="Surface Plant Capital Cost Adjustment Factor"
+                 ReadOnly="true"
+                 Variant="Variant.Outlined" />
+
+<SentinelNumericField @bind-Value="Parms.ccgathfixed"
+                      Label="Field Gathering System Capital Cost" />
+<MudNumericField T="double" @bind-Value="Parms.ccgathadjfactor"
+                 Label="Field Gathering System Capital Cost Adjustment Factor"
+                 ReadOnly="true"
+                 Variant="Variant.Outlined" />
+
+<SentinelNumericField @bind-Value="Parms.ccexplfixed"
+                      Label="Exploration Capital Cost" />
+<MudNumericField T="double" @bind-Value="Parms.ccexpladjfactor"
+                 Label="Exploration Capital Cost Adjustment Factor"
+                 ReadOnly="true"
+                 Variant="Variant.Outlined" />
+
+@* O&M costs *@
+<SentinelNumericField @bind-Value="Parms.oamtotalfixed"
+                      Label="Total O and M Cost" />
+
+<SentinelNumericField @bind-Value="Parms.oamwellfixed"
+                      Label="Wellfield O and M Cost" />
+<MudNumericField T="double" @bind-Value="Parms.oamwelladjfactor"
+                 Label="Wellfield O and M Cost Adjustment Factor"
+                 ReadOnly="true"
+                 Variant="Variant.Outlined" />
+
+<SentinelNumericField @bind-Value="Parms.oamplantfixed"
+                      Label="Surface Plant O and M Cost" />
+<MudNumericField T="double" @bind-Value="Parms.oamplantadjfactor"
+                 Label="Surface Plant O and M Cost Adjustment Factor"
+                 ReadOnly="true"
+                 Variant="Variant.Outlined" />
+
+<SentinelNumericField @bind-Value="Parms.oamwaterfixed"
+                      Label="Water Cost" />
+<MudNumericField T="double" @bind-Value="Parms.oamwateradjfactor"
+                 Label="Water Cost Adjustment Factor"
+                 ReadOnly="true"
+                 Variant="Variant.Outlined" />
+
+@* Prices *@
+<SentinelNumericField @bind-Value="Parms.elecprice"
+                      Label="Electricity Rate" />
+<SentinelNumericField @bind-Value="Parms.heatprice"
+                      Label="Heat Rate" />
+
+    @code {
     [Parameter] public CapitalAndOMCostParameters Parms { get; set; }
+    [Parameter] public SubsurfaceTechnicalParameters SubSurfaceParms { get; set; }
+    [Parameter] public SimulationParameters SimParms { get; set; }
 
-    private double? totalCapitalCost;
-    private double? wellDrillingCompletionCapitalCost;
-    private double wellDrillingCompletionCapitalCostAdjustmentFactor;
-    private int wellDrillingCostCorrelation;
-    private double? reservoirStimulationCapitalCost;
-    private double reservoirStimulationCapitalCostAdjustmentFactor;
-    private double? surfacePlantCapitalCost;
-    private double surfacePlantCapitalCostAdjustmentFactor;
-    private double? fieldGatheringSystemCapitalCost;
-    private double fieldGatheringSystemCapitalCostAdjustmentFactor;
-    private double? explorationCapitalCost;
-    private double explorationCapitalCostAdjustmentFactor;
-    private double? totalOMCost;
-    private double? wellfieldOMCost;
-    private double wellfieldOMCostAdjustmentFactor;
-    private double? surfacePlantOMCost;
-    private double surfacePlantOMCostAdjustmentFactor;
-    private double? waterCost;
-    private double waterCostAdjustmentFactor;
-    private double? electricityRate;
-    private double? heatRate;
-
-    protected override void OnParametersSet()
+    private static readonly (int Value, string Label)[] WellCorrelations =
     {
-        totalCapitalCost = Parms.TotalCapitalCost;
-        if (totalCapitalCost == -1) totalCapitalCost = null;
-        wellDrillingCompletionCapitalCost = Parms.ccwellfixed;
-        if (wellDrillingCompletionCapitalCost == -1) wellDrillingCompletionCapitalCost = null;
-        wellDrillingCompletionCapitalCostAdjustmentFactor = Parms.ccwelladjfactor;
-        wellDrillingCostCorrelation = Parms.wellcorrelation;
-        reservoirStimulationCapitalCost = Parms.ccstimfixed;
-        if (reservoirStimulationCapitalCost == -1) reservoirStimulationCapitalCost = null;
-        reservoirStimulationCapitalCostAdjustmentFactor = Parms.ccstimadjfactor;
-        surfacePlantCapitalCost = Parms.ccplantfixed;
-        if (surfacePlantCapitalCost == -1) surfacePlantCapitalCost = null;
-        surfacePlantCapitalCostAdjustmentFactor = Parms.ccplantadjfactor;
-        fieldGatheringSystemCapitalCost = Parms.ccgathfixed;
-        if (fieldGatheringSystemCapitalCost == -1) fieldGatheringSystemCapitalCost = null;
-        fieldGatheringSystemCapitalCostAdjustmentFactor = Parms.ccgathadjfactor;
-        explorationCapitalCost = Parms.ccexplfixed;
-        if (explorationCapitalCost == -1) explorationCapitalCost = null;
-        explorationCapitalCostAdjustmentFactor = Parms.ccexpladjfactor;
-        totalOMCost = Parms.oamtotalfixed;
-        if (totalOMCost == -1) totalOMCost = null;
-        wellfieldOMCost = Parms.oamwellfixed;
-        if (wellfieldOMCost == -1) wellfieldOMCost = null;
-        wellfieldOMCostAdjustmentFactor = Parms.oamwelladjfactor;
-        surfacePlantOMCost = Parms.oamplantfixed;
-        if (surfacePlantOMCost == -1) surfacePlantOMCost = null;
-        surfacePlantOMCostAdjustmentFactor = Parms.oamplantadjfactor;
-        waterCost = Parms.oamwaterfixed;
-        if (waterCost == -1) waterCost = null;
-        waterCostAdjustmentFactor = Parms.oamwateradjfactor;
-        electricityRate = Parms.elecprice;
-        if (electricityRate == -1) electricityRate = null;
-        heatRate = Parms.heatprice;
-        if (heatRate == -1) heatRate = null;
+        (1,  "vertical small diameter, baseline"),
+        (2,  "deviated small diameter, baseline"),
+        (3,  "vertical large diameter, baseline"),
+        (4,  "deviated large diameter, baseline"),
+        (5,  "Simple (per-meter cost)"),
+        (6,  "vertical small diameter, intermediate1"),
+        (7,  "vertical small diameter, intermediate2"),
+        (8,  "deviated small diameter, intermediate1"),
+        (9,  "deviated small diameter, intermediate2"),
+        (10, "vertical large diameter, intermediate1"),
+        (11, "vertical large diameter, intermediate2"),
+        (12, "deviated large diameter, intermediate1"),
+        (13, "deviated large diameter, intermediate2"),
+        (14, "vertical open-hole, small diameter, ideal"),
+        (15, "deviated liner, small diameter, ideal"),
+        (16, "vertical open-hole, large diameter, ideal"),
+        (17, "deviated liner, large diameter, ideal"),
+    };
+
+    
+    private async Task OpenDrillingCostAssistantAsync()
+    {
+        var parameters = new DialogParameters
+        {
+            [nameof(DrillingCostAssistantDialog.Parms)] = Parms,
+            [nameof(DrillingCostAssistantDialog.Subsurface)] = SubSurfaceParms,
+            [nameof(DrillingCostAssistantDialog.EndUseOption)] = SimParms.enduseoption,
+            [nameof(DrillingCostAssistantDialog.CurrentCost)] = Parms.ccwellfixed,
+            [nameof(DrillingCostAssistantDialog.Latitude)] = SimParms.projectlatitude,
+            [nameof(DrillingCostAssistantDialog.Longitude)] = SimParms.projectlongitude
+        };
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<DrillingCostAssistantDialog>(
+            "Drilling Cost Assistant", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: double suggestedCost }
+            && double.IsFinite(suggestedCost)
+            && suggestedCost >= 0)
+        {
+            Parms.ccwellfixed = suggestedCost;
+            Parms.ccwellfixedvalid = 1;
+            Console.WriteLine($"Drilling cost updated to: {suggestedCost}");
+        }
     }
 }

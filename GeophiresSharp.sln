@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33403.182
+# Visual Studio Version 18
+VisualStudioVersion = 18.11.12224.323
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorGeophiresSharp.Shared", "BlazorGeophiresSharp\Shared\BlazorGeophiresSharp.Shared.csproj", "{58364317-BEDB-47EC-AF0B-D1ED8B6615F8}"
 EndProject
